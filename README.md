@@ -3,7 +3,6 @@ Usage example:
 
     $token = <bot_token>;
     $config_telegram = array(
-      'botBaseUrl' => 'https://<silex_app>/index.php',  // used for setwebhook (assumes Silex is used)
       'apiurl' => 'https://api.telegram.org'
     );
     $httpClient = new \Guzzle\Http\Client();
