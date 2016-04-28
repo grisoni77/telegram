@@ -22,24 +22,24 @@ Usage example:
 
 Command Handler example:
 
-   namespace MyHandlers;
-
-   use Gr77\Command\Base;
-   use Gr77\Telegram\Message\Content\Text;
-   use Gr77\Telegram\Update;
-
-   class Start extends Base
-   {
-    /**
-     * @param Update $update
-     * @return bool returns false to break handlers chain, true to run next handlers
-     */
-    public function __invoke(Update $update)
-    {
-        $chat_id = $update->getMessage()->chat['id'];
-        $text = new Text("Some welcome text");
-        $res = $this->client->sendMessage($chat_id, $text);
-
-        return $res->isOk();
-    }
-   }
+     namespace MyHandlers;
+     
+     use Gr77\Command\Base;
+     use Gr77\Telegram\Message\Content\Text;
+     use Gr77\Telegram\Update;
+     
+     class Start extends Base
+     {
+         /**
+          * @param Update $update
+          * @return bool returns false to break handlers chain, true to run next handlers
+          */
+         public function __invoke(Update $update)
+         {
+             $chat_id = $update->getMessage()->chat['id'];
+             $text = new Text("Some welcome text");
+             $res = $this->client->sendMessage($chat_id, $text);
+             
+             return $res->isOk();
+         }
+     }
