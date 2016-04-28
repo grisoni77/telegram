@@ -7,6 +7,11 @@
             "email": "cristiano.cucco@gmail.com"
         }
     ],
+    "autoload": {
+	"psr-4": {
+		"Gr77\\": "\\"
+	}
+    },
     "require": {
 	"guzzle/guzzle": "v3.8.1",
         "joomla/string": "~1.0"
