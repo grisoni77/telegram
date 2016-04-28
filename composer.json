@@ -1,0 +1,14 @@
+{
+    "name": "gr77/telegram",
+    "description": "PHP Telegram Client",
+    "authors": [
+        {
+            "name": "Cristiano Cucco",
+            "email": "cristiano.cucco@gmail.com"
+        }
+    ],
+    "require": {
+	"guzzle/guzzle": "v3.8.1",
+        "joomla/string": "~1.0"
+    }
+}
