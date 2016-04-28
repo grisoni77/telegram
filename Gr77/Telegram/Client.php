@@ -45,6 +45,32 @@ class Client
         }
     }
 
+    /**
+     * @return \Guzzle\Http\Client
+     */
+    public function getHttpClient()
+    {
+        return $this->httpClient;
+    }
+
+    /**
+     * @return NullLogger
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+
+
     public function setWebhook($token)
     {
         try {
@@ -259,6 +285,46 @@ class Client
                 $body["reply_markup"] = $reply_markup->toArray();
             }
             $request = $this->httpClient->post('editMessageText');
+            $request->setHeader('Content-Type', 'application/json');
+            $request->setBody(json_encode($body));
+            echo json_encode($body);
+            $res = $request->send()->json();
+            return new Message($res);
+        } catch (BadResponseException $e) {
+            echo $e->getMessage();
+//            print_r($e->getResponse());
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
+        }
+    }
+
+
+    /**
+     * @param string $inline_query_id Unique identifier for the answered query
+     * @param \Gr77\Telegram\InlineQuery\InlineQueryResult[] $results
+     * @param int $cache_time
+     * @param bool $is_personal
+     * @param string $next_offset
+     * @param string $switch_pm_text
+     * @param string $switch_pm_parameter
+     */
+    public function answerInlineQuery(
+        $inline_query_id,
+        $results,
+        $cache_time = null,
+        $is_personal = null,
+        $next_offset = null,
+        $switch_pm_text = null,
+        $switch_pm_parameter = null
+    )
+    {
+        try {
+            $body = array(
+                "inline_query_id" => $inline_query_id,
+                "results" => $results,
+                //"myField" => "prova",
+            );
+            $request = $this->httpClient->post('answerInlineQuery');
             $request->setHeader('Content-Type', 'application/json');
             $request->setBody(json_encode($body));
             echo json_encode($body);

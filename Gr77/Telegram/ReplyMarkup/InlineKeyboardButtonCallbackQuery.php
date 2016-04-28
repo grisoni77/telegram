@@ -22,11 +22,15 @@ class InlineKeyboardButtonCallbackQuery extends InlineKeyboardButton
 
     /**
      * InlineKeyboardButtonCallbackQuery constructor.
-     * @param string $callback_data
+     * @param string $text
+     * @param string|array $callback_data
      */
     public function __construct($text, $callback_data)
     {
         $this->text = $text;
+        if (is_array($callback_data)) {
+            $callback_data = InlineKeyboardButtonCallbackQuery::serializeData($callback_data);
+        }
         $this->callback_data = $callback_data;
     }
 
@@ -48,5 +52,20 @@ class InlineKeyboardButtonCallbackQuery extends InlineKeyboardButton
         return $this;
     }
 
+    /**
+     * @param array $data
+     */
+    public static function serializeData($data)
+    {
+        return implode("::", $data);
+    }
+
+    /**
+     * @return array
+     */
+    public static function unserializedData($data)
+    {
+        return explode("::", $data);
+    }
 
 }

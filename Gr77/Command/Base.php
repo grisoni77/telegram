@@ -29,7 +29,7 @@ abstract class Base implements Handler
      * @param LoggerInterface|null $logger
      * @param array $config
      */
-    public function __construct(Client $client, LoggerInterface $logger = null, $config = array())
+    public function __construct(Client $client, $config = array(), LoggerInterface $logger = null)
     {
         $this->client = $client;
         if (null == $logger) {
@@ -46,9 +46,9 @@ abstract class Base implements Handler
      * @param array $config
      * @return static
      */
-    public static function provide(Client $client, LoggerInterface $logger = null, $config = array())
+    public static function provide(Client $client, $config = array(), LoggerInterface $logger = null)
     {
-        $handler = new static($client, $logger, $config);
+        $handler = new static($client, $config, $logger);
         return $handler;
     }
 

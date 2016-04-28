@@ -11,6 +11,7 @@
 namespace Gr77\Controller;
 
 
+use Gr77\Telegram\ReplyMarkup\InlineKeyboardButtonCallbackQuery;
 use Gr77\Telegram\Response\Response;
 use Gr77\Telegram\Response\Updates;
 use Gr77\Telegram\Update;
@@ -240,7 +241,7 @@ class Controller
             $handlers = $this->getCommandHandlers($text);
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
-                $handler = $handlerClassname::provide($this->client, $this->config_bot);
+                $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
                 if (false === $handler($update)) {
                     break;
                 }
@@ -260,7 +261,7 @@ class Controller
         if (false !== $handlers = $this->getTextHandlers($text)) {
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
-                $handler = $handlerClassname::provide($this->client, $this->config_bot);
+                $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
                 if (false === $handler($update)) {
                     break;
                 }
@@ -278,12 +279,14 @@ class Controller
     {
         $callbackQuery = $update->getCallbackQuery();
         //print_r($callbackQuery);
-        $data = $callbackQuery->getData();
-        list($class,$method) = explode("::", $data);
-        $className = "\\CbBot\\Handler\\".ucfirst($class);
+//        $data = $callbackQuery->getData();
+//        list($className,$method) = explode("::", $data);
+        $data = InlineKeyboardButtonCallbackQuery::unserializedData($callbackQuery->getData());
+        $className = $data[0];
+        $method = $data[1];
         $methodName = "handle".ucfirst($method);
         if (class_exists($className)) {
-            $handler = $className::provide($this->client, $this->config_bot);
+            $handler = $className::provide($this->client, $this->config_bot, $this->logger);
             if (method_exists($handler, $methodName)) {
                 return call_user_func(array($handler, $methodName), $update);
             }
@@ -304,8 +307,8 @@ class Controller
         if (false !== $handlers = $this->getTextHandlers($query)) {
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
-                $handler = $handlerClassname::provide($this->client, $this->config_bot);
-                if (false === $handler($update)) {
+                $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+                if (false === $handler->handleInlineQuery($update)) {
                     break;
                 }
             }

@@ -40,23 +40,31 @@ class InlineKeyboardButtonRow extends \ArrayObject
         $this->prependButton(new InlineKeyboardButtonUrl($text, $url));
     }
 
-    public function appendCallbackQuery($text, $url)
+    /**
+     * @param string $text
+     * @param array $data
+     */
+    public function appendCallbackQuery($text, $data)
     {
-        $this->appendButton(new InlineKeyboardButtonCallbackQuery($text, $url));
+        $this->appendButton(new InlineKeyboardButtonCallbackQuery($text, $data));
     }
 
-    public function prependCallbackQuery($text, $url)
+    /**
+     * @param string $text
+     * @param array $data
+     */
+    public function prependCallbackQuery($text, $data)
     {
-        $this->prependButton(new InlineKeyboardButtonCallbackQuery($text, $url));
+        $this->prependButton(new InlineKeyboardButtonCallbackQuery($text, $data));
     }
 
-    public function appendSwitchInlineQuery($text, $url)
+    public function appendSwitchInlineQuery($text, $switch_inline_query)
     {
-        $this->appendButton(new InlineKeyboardButtonSwitchInlineQuery($text, $url));
+        $this->appendButton(new InlineKeyboardButtonSwitchInlineQuery($text, $switch_inline_query));
     }
 
-    public function prependSwitchInlineQuery($text, $url)
+    public function prependSwitchInlineQuery($text, $switch_inline_query)
     {
-        $this->prependButton(new InlineKeyboardButtonSwitchInlineQuery($text, $url));
+        $this->prependButton(new InlineKeyboardButtonSwitchInlineQuery($text, $switch_inline_query));
     }
 }

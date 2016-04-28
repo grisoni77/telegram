@@ -12,6 +12,8 @@
 namespace Gr77\Telegram\InlineQuery;
 
 
+use Gr77\Telegram\User;
+
 class InlineQuery
 {
     /**
