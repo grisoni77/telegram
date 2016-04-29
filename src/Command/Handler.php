@@ -14,11 +14,11 @@ interface Handler
      */
     public static function provide(Client $client, $config = array(), LoggerInterface $logger = null);
 
-    /**
-     * @param Update $update
-     * @return bool Ritorna false per interrompere la catena di handlers
-     */
-    public function __invoke(Update $update);
+//    /**
+//     * @param Update $update
+//     * @return bool Ritorna false per interrompere la catena di handlers
+//     */
+//    public function __invoke(Update $update);
 
     /**
      * @return string

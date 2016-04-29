@@ -103,7 +103,7 @@ class Controller
      */
     public function registerCommandHandler($word, $handler)
     {
-        if (!$this->commandHandlers->offsetGet($word)) {
+        if (!$this->commandHandlers->offsetExists($word)) {
             $this->commandHandlers->offsetSet($word, new \ArrayObject());
         }
         $this->commandHandlers[$word]->append($handler);
@@ -115,7 +115,7 @@ class Controller
      */
     protected function hasCommandHandlers($word)
     {
-        return array_key_exists($word, $this->commandHandlers);
+        return $this->commandHandlers->offsetExists($word);
     }
 
     /**
@@ -133,7 +133,7 @@ class Controller
      */
     public function registerRegexpHandler($regexp, $handler)
     {
-        if (!$this->textHandlers->offsetGet($regexp)) {
+        if (!$this->textHandlers->offsetExists($regexp)) {
             $this->textHandlers->offsetSet($regexp, new \ArrayObject());
         }
         $this->textHandlers[$regexp]->append($handler);
@@ -145,8 +145,8 @@ class Controller
      */
     public function registerTextHandler($text, $handler)
     {
-        $regexp = sprintf("/%s/", preg_quote($text));
-        if (!$this->textHandlers->offsetGet($regexp)) {
+        $regexp = sprintf("/%s/i", preg_quote($text));
+        if (!$this->textHandlers->offsetExists($regexp)) {
             $this->textHandlers->offsetSet($regexp, new \ArrayObject());
         }
         $this->textHandlers[$regexp]->append($handler);
@@ -242,7 +242,7 @@ class Controller
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
                 $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
-                if (false === $handler($update)) {
+                if (false === $handler->handleCommand($update)) {
                     break;
                 }
             }
@@ -261,8 +261,9 @@ class Controller
         if (false !== $handlers = $this->getTextHandlers($text)) {
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
+                /** @var \Gr77\Command\TextHandler $handler */
                 $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
-                if (false === $handler($update)) {
+                if (false === $handler->handleText($update)) {
                     break;
                 }
             }
@@ -286,6 +287,7 @@ class Controller
         $method = $data[1];
         $methodName = "handle".ucfirst($method);
         if (class_exists($className)) {
+            /** @var \Gr77\Command\CommandHandler $handler */
             $handler = $className::provide($this->client, $this->config_bot, $this->logger);
             if (method_exists($handler, $methodName)) {
                 return call_user_func(array($handler, $methodName), $update);
@@ -307,6 +309,7 @@ class Controller
         if (false !== $handlers = $this->getTextHandlers($query)) {
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
+                /** @var \Gr77\Command\InlineQueryHandler $handler */
                 $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
                 if (false === $handler->handleInlineQuery($update)) {
                     break;
