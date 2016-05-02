@@ -13,7 +13,8 @@
 	}
     },
     "require": {
-	"guzzle/guzzle": "v3.8.1",
+        "php" : ">=^5.4",
+        "guzzle/guzzle": "v3.8.1",
         "joomla/string": "~1.0"
     }
 }
