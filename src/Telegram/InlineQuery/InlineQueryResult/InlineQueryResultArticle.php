@@ -11,7 +11,7 @@
 
 namespace Gr77\Telegram\InlineQuery\InlineQueryResult;
 
-use Gr77\Telegram\InlineQuery\Input\InputMessageContent;
+use Gr77\Telegram\InlineQuery\Input\InputTextMessageContent;
 
 /**
  * Class InlineQueryResultArticle
@@ -28,13 +28,13 @@ class InlineQueryResultArticle extends InlineQueryResult
     public $title;
     /**
      * Content of the message to be sent
-     * @var \Gr77\Telegram\InlineQuery\Input\InputMessageContent
+     * @var \Gr77\Telegram\InlineQuery\Input\InputTextMessageContent
      */
     public $input_message_content;
 
     /**
      * @param array $data
-     * @return Chat
+     * @return InlineQueryResultArticle
      */
     protected static function _mapFromArray($data)
     {
@@ -44,8 +44,8 @@ class InlineQueryResultArticle extends InlineQueryResult
         }
         if (isset($data["input_message_content"])) {
             if (is_array($data["input_message_content"])) {
-                $item->input_message_content  = InputMessageContent::mapFromArray($data["input_message_content"]);
-            } elseif ($data["input_message_content"] instanceof InputMessageContent) {
+                $item->input_message_content  = InputTextMessageContent::mapFromArray($data["input_message_content"]);
+            } elseif ($data["input_message_content"] instanceof InputTextMessageContent) {
                 $item->input_message_content = $data["input_message_content"];
             }
         }

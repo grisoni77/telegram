@@ -217,7 +217,10 @@ class Message
         return false;
     }
 
-
+    public function hasText()
+    {
+        return isset($this->text);
+    }
 
     /**
      * Magic method per recuperare var non definite direttamente tramite membri della classe

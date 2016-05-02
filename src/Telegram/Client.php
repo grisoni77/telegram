@@ -301,7 +301,7 @@ class Client
 
     /**
      * @param string $inline_query_id Unique identifier for the answered query
-     * @param \Gr77\Telegram\InlineQuery\InlineQueryResult\InlineQueryResult[] $results
+     * @param \Gr77\Telegram\InlineQuery\InlineQueryResult[] $results
      * @param int $cache_time
      * @param bool $is_personal
      * @param string $next_offset
@@ -322,12 +322,13 @@ class Client
             $body = array(
                 "inline_query_id" => $inline_query_id,
                 "results" => $results,
+                //"myField" => "prova",
             );
             $request = $this->httpClient->post('answerInlineQuery');
             $request->setHeader('Content-Type', 'application/json');
             $request->setBody(json_encode($body));
             echo json_encode($body);
-            //$res = $request->send()->json();
+            $res = $request->send()->json();
             return new Message($res);
         } catch (BadResponseException $e) {
             echo $e->getMessage();

@@ -221,7 +221,7 @@ class Controller
         if ($message->isCommand()) {
             $this->handleCommand($update);
         }
-        else {
+        elseif ($message->hasText()) {
             $this->handleText($update);
         }
 
