@@ -29,7 +29,11 @@ class Update
      * @var \Gr77\Telegram\InlineQuery\InlineQuery
      */
     private $inline_query;
-//    private $chosen_inline_result;
+    /**
+     * Optional. The result of an inline query that was chosen by a user and sent to their chat partner.
+     * @var \Gr77\Telegram\InlineQuery\ChosenInlineResult
+     */
+    private $chosen_inline_result;
     /**
      * Optional. New incoming callback query
      * @var \Gr77\Telegram\CallbackQuery\CallbackQuery
@@ -52,6 +56,9 @@ class Update
         }
         if (isset($data['inline_query'])) {
             $update->setInlineQuery(InlineQuery::mapFromArray($data['inline_query']));
+        }
+        if (isset($data['chosen_inline_result'])) {
+            $update->setChosenInlineResult(ChosenInlineResult::mapFromArray($data['chosen_inline_result']));
         }
         return $update;
     }
@@ -112,6 +119,26 @@ class Update
     }
 
     /**
+     * @return \Gr77\Telegram\InlineQuery\ChosenInlineResult
+     */
+    public function getChosenInlineResult()
+    {
+        return $this->chosen_inline_result;
+    }
+
+    /**
+     * @param \Gr77\Telegram\InlineQuery\ChosenInlineResult $chosen_inline_result
+     * @return Update
+     */
+    public function setChosenInlineResult($chosen_inline_result)
+    {
+        $this->chosen_inline_result = $chosen_inline_result;
+        return $this;
+    }
+
+
+
+    /**
      * @return Message
      */
     public function getMessage()
@@ -154,6 +181,14 @@ class Update
     public function hasInlineQuery()
     {
         return isset($this->inline_query);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasChosenInlineResult()
+    {
+        return isset($this->chosen_inline_result);
     }
 
 }

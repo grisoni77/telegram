@@ -28,5 +28,11 @@ class Location
         $this->latitude = $latitude;
     }
 
-
+    public static function mapFromArray($data)
+    {
+        if (!isset($data["latitude"]) || !isset($data["longitude"])) {
+            throw new \InvalidArgumentException("Invalid arguments for constructor ".__CLASS__, 500);
+        }
+        return new self($data["latitude"],$data["longitude"]);
+    }
 }

@@ -207,6 +207,9 @@ class Controller
         if ($update->hasInlineQuery()) {
             $this->handleInlineQuery($update);
         }
+        if ($update->hasChosenInlineResult()) {
+            $this->handleChosenInlineResult($update);
+        }
     }
 
     /**
@@ -312,6 +315,28 @@ class Controller
                 /** @var \Gr77\Command\InlineQueryHandler $handler */
                 $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
                 if (false === $handler->handleInlineQuery($update)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Gestisce Update di tipo InlineQuery
+     *
+     * @param \Gr77\Telegram\Update $update
+     */
+    protected function handleChosenInlineResult(Update $update)
+    {
+        $chosenInlineResult = $update->getChosenInlineResult();
+        //print_r($chosenInlineResult);
+        $query = $chosenInlineResult->getQuery();
+        if (false !== $handlers = $this->getTextHandlers($query)) {
+            //var_dump($handlers);
+            foreach ($handlers as $handlerClassname) {
+                /** @var \Gr77\Command\InlineQueryHandler $handler */
+                $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+                if (false === $handler->handleChosenInlineResult($update)) {
                     break;
                 }
             }
