@@ -50,6 +50,10 @@ class Message
      * @var Entity\MessageEntity[]
      */
     private $entities;
+    /**
+     * @var string
+     */
+    private $text;
 
     private $data;
 
@@ -73,6 +77,9 @@ class Message
             foreach ($data["entities"] as $entity) {
                 $message->addEntity(MessageEntity::mapFromArray($entity, $data["text"]));
             }
+        }
+        if (isset($data["text"])) {
+            $message->setText($data["text"]);
         }
         $message->setData($data);
         return $message;
@@ -185,6 +192,26 @@ class Message
         $this->entities->append($entity);
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function getText()
+    {
+        return $this->text;
+    }
+
+    /**
+     * @param string $text
+     * @return Message
+     */
+    public function setText($text)
+    {
+        $this->text = $text;
+        return $this;
+    }
+
+
 
     /**
      * Ritorna true se la prima delle entity è un command
