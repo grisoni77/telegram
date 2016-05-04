@@ -50,13 +50,19 @@ class InlineQueryResultLocation extends InlineQueryResult
         $item->title = $data["title"];
         $item->latitude = $data["latitude"];
         $item->longitude = $data["longitude"];
-        if (isset($data["input_message_content"])) {
-            if (is_array($data["input_message_content"])) {
-                $item->input_message_content  = InputMessageContent::mapFromArray($data["input_message_content"]);
-            } elseif ($data["input_message_content"] instanceof InputMessageContent) {
-                $item->input_message_content = $data["input_message_content"];
-            }
-        }
+
         return $item;
     }
+
+    public function jsonSerialize()
+    {
+        $data = parent::jsonSerialize();
+        $data["title"] = $this->title;
+        $data["latitude"] = $this->latitude;
+        $data["longitude"] = $this->longitude;
+
+        return $data;
+    }
+
+
 }

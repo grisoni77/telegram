@@ -286,7 +286,7 @@ class Controller
 //        $data = $callbackQuery->getData();
 //        list($className,$method) = explode("::", $data);
         $data = InlineKeyboardButtonCallbackQuery::unserializedData($callbackQuery->getData());
-        $className = $data[0];
+        $className = $this->config_bot["handler_namespace"].$data[0];
         $method = $data[1];
         $methodName = "handle".ucfirst($method);
         if (class_exists($className)) {

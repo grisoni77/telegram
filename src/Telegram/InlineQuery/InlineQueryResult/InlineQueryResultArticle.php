@@ -42,13 +42,6 @@ class InlineQueryResultArticle extends InlineQueryResult
         if (isset($data["title"])) {
             $item->title = $data["title"];
         }
-        if (isset($data["input_message_content"])) {
-            if (is_array($data["input_message_content"])) {
-                $item->input_message_content  = InputTextMessageContent::mapFromArray($data["input_message_content"]);
-            } elseif ($data["input_message_content"] instanceof InputTextMessageContent) {
-                $item->input_message_content = $data["input_message_content"];
-            }
-        }
         return $item;
     }
 

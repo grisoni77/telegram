@@ -42,4 +42,12 @@ class InlineQueryResultVenue extends InlineQueryResultLocation
 
         return $item;
     }
+
+    public function jsonSerialize()
+    {
+        $data = parent::jsonSerialize();
+        $data["address"] = $this->address;
+
+        return $data;
+    }
 }
