@@ -154,6 +154,36 @@ class Client
         }
     }
 
+
+    /**
+     * Use this method when you need to tell the user that something is happening on the bot's side.
+     * The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status).
+     *
+     * @param int|string $chat_id Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+     * @param string $action Type of action to broadcast. See constants defined in Gr77\Telegram\Chat\Action class
+     * @return Message
+     * @see https://core.telegram.org/bots/api#sendchataction
+     */
+    public function sendChatAction($chat_id, $action)
+    {
+        try {
+            $body = array(
+                "chat_id" => $chat_id,
+                "action" => $action,
+            );
+            $request = $this->httpClient->post('sendChatAction');
+            $request->setHeader('Content-Type', 'application/json');
+            $request->setBody($this->toJson($body));
+            $res = $request->send()->json();
+            return new Message($res);
+        } catch (BadResponseException $e) {
+            echo $e->getMessage();
+//            print_r($e->getResponse());
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
+        }
+    }
+
     /**
      * @param int $chat_id
      * @param Text|null $text
