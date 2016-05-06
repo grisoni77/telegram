@@ -185,7 +185,7 @@ class Client
             }
             if (isset($parse_mode)) {
                 $body["parse_mode"] = $parse_mode;
-            } elseif (isset($text) && (!($text instanceof Text))) {
+            } elseif (isset($text) && ($text instanceof Text)) {
                 $body["parse_mode"] = $text->getParseMode();
             }
             if (isset($disable_web_page_preview)) {
