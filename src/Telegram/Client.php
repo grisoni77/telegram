@@ -3,6 +3,7 @@ namespace Gr77\Telegram;
 
 use Gr77\Telegram\Message\Content\Text;
 use Gr77\Telegram\ReplyMarkup\ReplyMarkup;
+use Gr77\Telegram\Request\Serializer;
 use Gr77\Telegram\Response\Error;
 use Gr77\Telegram\Response\Message;
 use Gr77\Telegram\Response\Updates;
@@ -20,7 +21,9 @@ class Client
     protected $token;
     /** @var  string */
     protected $apiUrl;
-
+    /** @var Serializer  */
+    protected $serializer;
+    /** @var \Psr\Log\LoggerInterface  */
     protected $logger;
 
     /**
@@ -34,10 +37,11 @@ class Client
 
     }
 
-    public function __construct($config, \Guzzle\Http\Client $httpClient, LoggerInterface $logger = null)
+    public function __construct($config, \Guzzle\Http\Client $httpClient, Serializer $serializer, LoggerInterface $logger = null)
     {
         $this->config = $config;
         $this->httpClient = $httpClient;
+        $this->serializer = $serializer;
         if (isset($logger)) {
             $this->logger = $logger;
         } else {
@@ -70,7 +74,22 @@ class Client
     }
 
 
+    /**
+     * @param $body
+     * @return string
+     */
+    private function toJson($body)
+    {
+        $encodedBody = $this->serializer->toJson($body);
+        $this->logger->addDebug($encodedBody);
+        echo $encodedBody;
+        return $encodedBody;
+    }
 
+    /**
+     * @param $token
+     * @return array|bool|float|int|string
+     */
     public function setWebhook($token)
     {
         try {
@@ -89,6 +108,10 @@ class Client
         }
     }
 
+    /**
+     * @param $token
+     * @return array|bool|float|int|string
+     */
     public function removeWebhook($token)
     {
         try {
@@ -107,6 +130,10 @@ class Client
         }
     }
 
+    /**
+     * @param array $params
+     * @return Error|Updates
+     */
     public function getUpdates($params = array())
     {
         try {
@@ -175,8 +202,7 @@ class Client
             }
             $request = $this->httpClient->post('sendMessage');
             $request->setHeader('Content-Type', 'application/json');
-            $request->setBody(json_encode($body));
-            echo json_encode($body);
+            $request->setBody($this->toJson($body));
             $res = $request->send()->json();
             return new Message($res);
         } catch (BadResponseException $e) {
@@ -206,6 +232,8 @@ class Client
      * @param $callback_query_id Unique identifier for the query to be answered
      * @param string|null $text Text of the notification. If not specified, nothing will be shown to the user
      * @param null $show_alert If true, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
+     * @return Message
+     * @see https://core.telegram.org/bots/api#answercallbackquery
      */
     public function answerCallbackQuery(
         $callback_query_id,
@@ -225,8 +253,7 @@ class Client
             }
             $request = $this->httpClient->post('answerCallbackQuery');
             $request->setHeader('Content-Type', 'application/json');
-            $request->setBody(json_encode($body));
-            echo json_encode($body);
+            $request->setBody($this->toJson($body));
             $res = $request->send()->json();
             return new Message($res);
         } catch (BadResponseException $e) {
@@ -286,8 +313,7 @@ class Client
             }
             $request = $this->httpClient->post('editMessageText');
             $request->setHeader('Content-Type', 'application/json');
-            $request->setBody(json_encode($body));
-            echo json_encode($body);
+            $request->setBody($this->toJson($body));
             $res = $request->send()->json();
             return new Message($res);
         } catch (BadResponseException $e) {
@@ -326,8 +352,7 @@ class Client
             );
             $request = $this->httpClient->post('answerInlineQuery');
             $request->setHeader('Content-Type', 'application/json');
-            $request->setBody(json_encode($body));
-            echo json_encode($body);
+            $request->setBody($this->toJson($body));
             $res = $request->send()->json();
             return new Message($res);
         } catch (BadResponseException $e) {

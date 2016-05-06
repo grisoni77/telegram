@@ -11,7 +11,7 @@
 
 namespace Gr77\Telegram\InlineQuery\InlineQueryResult;
 
-use Gr77\Telegram\InlineQuery\Input\InputTextMessageContent;
+use Gr77\Telegram\InlineQuery\Input\InputMessageContent;
 
 /**
  * Class InlineQueryResultArticle
@@ -28,13 +28,13 @@ class InlineQueryResultArticle extends InlineQueryResult
     public $title;
     /**
      * Content of the message to be sent
-     * @var \Gr77\Telegram\InlineQuery\Input\InputTextMessageContent
+     * @var \Gr77\Telegram\InlineQuery\Input\InputMessageContent
      */
     public $input_message_content;
 
     /**
      * @param array $data
-     * @return InlineQueryResultArticle
+     * @return Chat
      */
     protected static function _mapFromArray($data)
     {
@@ -42,7 +42,30 @@ class InlineQueryResultArticle extends InlineQueryResult
         if (isset($data["title"])) {
             $item->title = $data["title"];
         }
+        if (isset($data["input_message_content"])) {
+            if (is_array($data["input_message_content"])) {
+                $item->input_message_content  = InputMessageContent::mapFromArray($data["input_message_content"]);
+            } elseif ($data["input_message_content"] instanceof InputMessageContent) {
+                $item->input_message_content = $data["input_message_content"];
+            }
+        }
         return $item;
     }
 
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    function jsonSerialize()
+    {
+        return array(
+            "id" => $this->id,
+            "type" => $this->type,
+            "title" => $this->title,
+            "input_message_content" => $this->input_message_content,
+        );
+    }
 }
