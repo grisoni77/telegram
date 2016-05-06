@@ -12,7 +12,7 @@
 namespace Gr77\Telegram\InlineQuery\InlineQueryResult;
 
 
-abstract class InlineQueryResult
+abstract class InlineQueryResult implements \JsonSerializable
 {
     /**
      * Type of the result, must be article
@@ -24,6 +24,16 @@ abstract class InlineQueryResult
      * @var string
      */
     public $id;
+    /**
+     * Optional. Inline keyboard attached to the message
+     * @var \Gr77\Telegram\ReplyMarkup\InlineKeyboardMarkup
+     */
+    public $reply_markup;
+    /**
+     * Optional. Content of the message to be sent instead of the contact
+     * @var \Gr77\Telegram\InlineQuery\Input\InputMessageContent
+     */
+    public $input_message_content;
 
     /**
      * InlineQueryResult constructor.
@@ -66,9 +76,41 @@ abstract class InlineQueryResult
     protected static function _mapFromArray($data)
     {
         if (!isset($data["id"]) || !isset($data["type"])) {
-            throw new \InvalidArgumentException("Id and type are mandatory fields for InlineQueryResult", 400);
+            throw new \InvalidArgumentException("Id and type are mandatory fields for InlineQueryResult: ".print_r($data,true), 400);
         }
         $item = new static($data["id"], $data["type"]);
+        if (isset($data["reply_markup"])) {
+            $item->reply_markup = $data["reply_markup"];
+        }
+        if (isset($data["input_message_content"])) {
+            if (is_array($data["input_message_content"])) {
+                $item->input_message_content  = InputMessageContent::mapFromArray($data["input_message_content"]);
+            } elseif ($data["input_message_content"] instanceof InputMessageContent) {
+                $item->input_message_content = $data["input_message_content"];
+            }
+        }
         return $item;
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        $data = array(
+            "id" => $this->id,
+            "type" => $this->type,
+        );
+        if (isset($this->reply_markup)) {
+            $data["reply_markup"] = $this->reply_markup->toArray();
+        }
+        if (isset($this->input_message_content)) {
+            $data["input_message_content"] = $this->input_message_content;
+        }
+        return $data;
     }
 }
