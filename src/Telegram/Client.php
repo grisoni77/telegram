@@ -81,6 +81,7 @@ class Client
     private function toJson($body)
     {
         $encodedBody = $this->serializer->toJson($body);
+        preg_replace('/,\s*"[^"]+":null|"[^"]+":null,?/', '', $encodedBody);
         $this->logger->addDebug($encodedBody);
         echo $encodedBody;
         return $encodedBody;
