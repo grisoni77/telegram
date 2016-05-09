@@ -4,6 +4,7 @@ namespace Gr77\Telegram;
 use Gr77\Telegram\Message\Content\Text;
 use Gr77\Telegram\ReplyMarkup\ReplyMarkup;
 use Gr77\Telegram\Request\Serializer;
+use Gr77\Telegram\Response\Boolean;
 use Gr77\Telegram\Response\Error;
 use Gr77\Telegram\Response\Message;
 use Gr77\Telegram\Response\Updates;
@@ -81,7 +82,6 @@ class Client
     private function toJson($body)
     {
         $encodedBody = $this->serializer->toJson($body);
-        preg_replace('/,\s*"[^"]+":null|"[^"]+":null,?/', '', $encodedBody);
         $this->logger->addDebug($encodedBody);
         echo $encodedBody;
         return $encodedBody;
@@ -176,9 +176,9 @@ class Client
             $request->setHeader('Content-Type', 'application/json');
             $request->setBody($this->toJson($body));
             $res = $request->send()->json();
-            return new Message($res);
+            return new Boolean($res);
         } catch (BadResponseException $e) {
-            echo $e->getMessage();
+            //echo $e->getMessage();
 //            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
