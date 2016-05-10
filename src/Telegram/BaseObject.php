@@ -14,10 +14,6 @@ namespace Gr77\Telegram;
 
 abstract class BaseObject
 {
-    public static function getProperties() {
-        return array();
-    }
-
     public function __get($name)
     {
         if (method_exists($this, 'get'.ucfirst($name))) {

@@ -83,7 +83,7 @@ class Client
     private function toJson($body)
     {
         $encodedBody = $this->serializer->toJson($body);
-        $this->logger->addDebug($encodedBody);
+        $this->logger->debug($encodedBody);
         echo $encodedBody;
         return $encodedBody;
     }
@@ -213,7 +213,7 @@ class Client
                 //"myField" => "prova",
             );
             if (isset($text)) {
-                $body["text"] = $text->getText();
+                $body["text"] = $text;
             }
             if (isset($parse_mode)) {
                 $body["parse_mode"] = $parse_mode;
@@ -285,8 +285,8 @@ class Client
         try {
             $body = array(
                 "chat_id" => $chat_id,
-                "latitude" => $location->latitude,
-                "longitude" => $location->longitude,
+                "latitude" => $location->getLatitude(),
+                "longitude" => $location->getLongitude(),
                 "title" => $title,
                 "address" => $address,
             );
@@ -378,7 +378,7 @@ class Client
     {
         try {
             $body = array(
-                "text" => $text->getText(),
+                "text" => $text,
                 //"myField" => "prova",
             );
             if (isset($chat_id)) {

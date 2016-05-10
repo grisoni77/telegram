@@ -11,6 +11,8 @@
 namespace Gr77\Telegram\ReplyMarkup;
 
 
+use Gr77\Telegram\BaseObject;
+
 abstract class ReplyMarkup extends BaseObject
 {
     /**

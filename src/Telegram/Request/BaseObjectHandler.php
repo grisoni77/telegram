@@ -58,7 +58,22 @@ class BaseObjectHandler implements  SubscribingHandlerInterface
     )
     {
         //return $visitor->startVisitingObject()
-        return $visitor->visitArray($obj->jsonSerialize(), $type, $context);
+        $data = $obj->jsonSerialize();
+        if (is_array($data)) {
+            return $visitor->visitArray($data, $type, $context);
+        }
+        elseif(is_int($data)) {
+            return $visitor->visitInteger($data, $type, $context);
+        }
+        elseif(is_string($data)) {
+            return $visitor->visitString($data, $type, $context);
+        }
+        elseif(is_bool($data)) {
+            return $visitor->visitBoolean($data, $type, $context);
+        }
+        elseif(is_null($data)) {
+            return $visitor->visitNull($data, $type, $context);
+        }
         //return $obj->getProperties();
 //        return $date->format($type['params'][0]);
     }

@@ -12,10 +12,10 @@
 namespace Gr77\Telegram\Message\Content;
 
 
-class Location
+class Location extends BaseObject implements \JsonSerializable
 {
-    public $longitude;
-    public $latitude;
+    private $longitude;
+    private $latitude;
 
     /**
      * Location constructor.
@@ -34,5 +34,33 @@ class Location
             throw new \InvalidArgumentException("Invalid arguments for constructor ".__CLASS__, 500);
         }
         return new self($data["latitude"],$data["longitude"]);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLongitude()
+    {
+        return $this->longitude;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLatitude()
+    {
+        return $this->latitude;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    function jsonSerialize()
+    {
+        return array(
+            "latitude" => $this->latitude,
+            "longitude" => $this->longitude,
+        );
     }
 }

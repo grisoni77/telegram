@@ -12,7 +12,9 @@
 namespace Gr77\Telegram\Message\Content;
 
 
-class Text
+use Gr77\Telegram\BaseObject;
+
+class Text extends BaseObject implements \JsonSerializable
 {
     /**
      * @var string
@@ -54,6 +56,14 @@ class Text
      * @return string
      */
     public function __toString()
+    {
+        return $this->text;
+    }
+
+    /**
+     * @return string
+     */
+    public function jsonSerialize()
     {
         return $this->text;
     }

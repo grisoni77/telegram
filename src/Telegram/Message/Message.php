@@ -13,6 +13,7 @@ namespace Gr77\Telegram\Message;
 
 
 use Gr77\Telegram\Chat\Chat;
+use Gr77\Telegram\Message\Content\Location;
 use Gr77\Telegram\Message\Entity\BotCommand;
 use Gr77\Telegram\Message\Entity\MessageEntity;
 use Gr77\Telegram\User;
@@ -40,20 +41,30 @@ class Message
      */
     private $chat;
     /**
+     * Date the message was sent in Unix time
+     * @var int
+     */
+    private $date;
+    /**
      * Optional. For replies, the original message.
      * Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
      * @var Message
      */
     private $reply_to_message;
     /**
+     * @var string
+     */
+    private $text;
+    /**
      * Optional. For text messages, special entities like usernames, URLs, bot commands, etc. that appear in the text
      * @var Entity\MessageEntity[]
      */
     private $entities;
     /**
-     * @var string
+     * Optional. Message is a shared location, information about the location
+     * @var Content/Location
      */
-    private $text;
+    private $location;
 
     private $data;
 
@@ -66,11 +77,15 @@ class Message
         $message = new self();
         $message->setMessageId($data["message_id"]);
         $message->setChat(Chat::mapFromArray($data["chat"]));
+        $message->setDate($data["date"]);
         if (isset($data["from"])) {
             $message->setFrom(User::mapFromArray($data["from"]));
         }
         if (isset($data["reply_to_message"])) {
             $message->setReplyToMessage(self::mapFromArray($data["reply_to_message"]));
+        }
+        if (isset($data["text"])) {
+            $message->setText($data["text"]);
         }
         if (isset($data["entities"])) {
             $message->setEntities(new \ArrayObject());
@@ -78,9 +93,10 @@ class Message
                 $message->addEntity(MessageEntity::mapFromArray($entity, $data["text"]));
             }
         }
-        if (isset($data["text"])) {
-            $message->setText($data["text"]);
+        if (isset($data["location"])) {
+            $message->setLocation(Location::mapFromArray($data["location"]));
         }
+
         $message->setData($data);
         return $message;
     }
@@ -99,6 +115,24 @@ class Message
     public function setMessageId($message_id)
     {
         $this->message_id = $message_id;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
+     * @param int $date
+     * @return Message
+     */
+    public function setDate($date)
+    {
+        $this->date = $date;
         return $this;
     }
 
@@ -208,6 +242,24 @@ class Message
     public function setText($text)
     {
         $this->text = $text;
+        return $this;
+    }
+
+    /**
+     * @return Content
+     */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /**
+     * @param Content $location
+     * @return Message
+     */
+    public function setLocation($location)
+    {
+        $this->location = $location;
         return $this;
     }
 
