@@ -1,6 +1,7 @@
 <?php
 namespace Gr77\Telegram;
 
+use Gr77\Telegram\Message\Content\Location;
 use Gr77\Telegram\Message\Content\Text;
 use Gr77\Telegram\ReplyMarkup\ReplyMarkup;
 use Gr77\Telegram\Request\Serializer;
@@ -254,6 +255,64 @@ class Client
     public function sendKeyboard($chat_id, Text $text, ReplyMarkup $keyboard)
     {
         return $this->sendMessage($chat_id, $text, null, null, null, null, $keyboard);
+    }
+
+
+    /**
+     * Use this method to send information about a venue. On success, the sent Message is returned.
+     * @param $chat_id
+     * @param Location $location
+     * @param $title
+     * @param $address
+     * @param $foursquare_id
+     * @param $disable_notification
+     * @param $reply_to_message_id
+     * @param $reply_markup
+     * @return Message
+     * @see https://core.telegram.org/bots/api#sendvenue
+     */
+    public function sendVenue(
+        $chat_id,
+        Location $location,
+        $title,
+        $address,
+        $foursquare_id = null,
+        $disable_notification = null,
+        $reply_to_message_id = null,
+        $reply_markup = null
+    )
+    {
+        try {
+            $body = array(
+                "chat_id" => $chat_id,
+                "latitude" => $location->latitude,
+                "longitude" => $location->longitude,
+                "title" => $title,
+                "address" => $address,
+            );
+            if (isset($foursquare_id)) {
+                $body["foursquare_id"] = $foursquare_id;
+            }
+            if (isset($disable_notification)) {
+                $body["disable_notification"] = $disable_notification;
+            }
+            if (isset($reply_to_message_id)) {
+                $body["reply_to_message_id"] = $reply_to_message_id;
+            }
+            if (isset($reply_markup)) {
+                $body["reply_markup"] = $reply_markup->toArray();
+            }
+            $request = $this->httpClient->post('sendVenue');
+            $request->setHeader('Content-Type', 'application/json');
+            $request->setBody($this->toJson($body));
+            $res = $request->send()->json();
+            return new Message($res);
+        } catch (BadResponseException $e) {
+            echo $e->getMessage();
+//            print_r($e->getResponse());
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
+        }
     }
 
     /**
