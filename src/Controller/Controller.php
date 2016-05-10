@@ -199,16 +199,16 @@ class Controller
     public function handleUpdate(Update $update)
     {
         if ($update->hasMessage()) {
-            $this->handleMessage($update);
+            return $this->handleMessage($update);
         }
         if ($update->hasCallbackQuery()) {
-            $this->handleCallbackQuery($update);
+            return $this->handleCallbackQuery($update);
         }
         if ($update->hasInlineQuery()) {
-            $this->handleInlineQuery($update);
+            return $this->handleInlineQuery($update);
         }
         if ($update->hasChosenInlineResult()) {
-            $this->handleChosenInlineResult($update);
+            return $this->handleChosenInlineResult($update);
         }
     }
 
@@ -222,10 +222,10 @@ class Controller
         $message = $update->getMessage();
         // manage bot command
         if ($message->isCommand()) {
-            $this->handleCommand($update);
+            return $this->handleCommand($update);
         }
         elseif ($message->hasText()) {
-            $this->handleText($update);
+            return $this->handleText($update);
         }
 
     }
