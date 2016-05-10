@@ -102,6 +102,22 @@ class Controller
                 }
             }
         }
+        if (isset($config["locationHandlers"]) && is_array($config["locationHandlers"]) && count($config["locationHandlers"])>0) {
+            foreach ($config["locationHandlers"] as $locationHandlers) {
+                settype($locationHandlers, 'array');
+                foreach ($locationHandlers as $handler) {
+                    $this->registerLocationHandler($handler);
+                }
+            }
+        }
+        if (isset($config["genericHandlers"]) && is_array($config["genericHandlers"]) && count($config["genericHandlers"])>0) {
+            foreach ($config["genericHandlers"] as $genericHandlers) {
+                settype($genericHandlers, 'array');
+                foreach ($genericHandlers as $handler) {
+                    $this->registerLocationHandler($handler);
+                }
+            }
+        }
     }
 
 
