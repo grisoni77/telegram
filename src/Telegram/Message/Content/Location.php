@@ -12,6 +12,8 @@
 namespace Gr77\Telegram\Message\Content;
 
 
+use Gr77\Telegram\BaseObject;
+
 class Location extends BaseObject implements \JsonSerializable
 {
     private $longitude;
