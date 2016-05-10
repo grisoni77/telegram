@@ -274,10 +274,10 @@ class Controller
             return $this->handleText($update);
         }
         elseif ($message->hasLocation()) {
-            return $this->handleLocation();
+            return $this->handleLocation($update);
         }
         else {
-            return $this->handleGeneric();
+            return $this->handleGeneric($update);
         }
 
     }

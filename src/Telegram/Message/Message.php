@@ -62,7 +62,7 @@ class Message
     private $entities;
     /**
      * Optional. Message is a shared location, information about the location
-     * @var Content/Location
+     * @var Content\Location
      */
     private $location;
 
@@ -246,7 +246,7 @@ class Message
     }
 
     /**
-     * @return Content
+     * @return Location
      */
     public function getLocation()
     {
@@ -254,7 +254,7 @@ class Message
     }
 
     /**
-     * @param Content $location
+     * @param Location $location
      * @return Message
      */
     public function setLocation($location)
