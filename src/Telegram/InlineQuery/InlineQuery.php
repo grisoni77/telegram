@@ -12,6 +12,7 @@
 namespace Gr77\Telegram\InlineQuery;
 
 
+use Gr77\Telegram\Message\Content\Location;
 use Gr77\Telegram\User;
 
 class InlineQuery
@@ -67,7 +68,7 @@ class InlineQuery
         }
         $inlineQuery = new self($data["id"], User::mapFromArray($data["from"]), $data["query"], $data["offset"]);
         if (isset($data["location"])) {
-//            $inlineQuery->setLocation();
+            $inlineQuery->setLocation(Location::mapFromArray($data["location"]));
         }
         return $inlineQuery;
     }
