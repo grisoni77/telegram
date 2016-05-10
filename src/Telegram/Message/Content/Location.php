@@ -16,18 +16,18 @@ use Gr77\Telegram\BaseObject;
 
 class Location extends BaseObject implements \JsonSerializable
 {
-    private $longitude;
     private $latitude;
+    private $longitude;
 
     /**
      * Location constructor.
      * @param $longitude
      * @param $latitude
      */
-    public function __construct($longitude, $latitude)
+    public function __construct($latitude, $longitude)
     {
-        $this->longitude = $longitude;
         $this->latitude = $latitude;
+        $this->longitude = $longitude;
     }
 
     public static function mapFromArray($data)
