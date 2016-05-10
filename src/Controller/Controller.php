@@ -11,6 +11,8 @@
 namespace Gr77\Controller;
 
 
+use Gr77\Command\GenericHandler;
+use Gr77\Command\LocationHandler;
 use Gr77\Telegram\ReplyMarkup\InlineKeyboardButtonCallbackQuery;
 use Gr77\Telegram\Response\Response;
 use Gr77\Telegram\Response\Updates;
@@ -30,6 +32,10 @@ class Controller
     protected $commandHandlers;
     /** @var  \ArrayObject */
     protected $textHandlers;
+    /** @var  \ArrayObject */
+    protected $locationHandlers;
+    /** @var  \ArrayObject */
+    protected $genericHandlers;
     /** @var  array config specific for bot */
     protected $config_bot = array();
 
@@ -52,6 +58,8 @@ class Controller
         }
         $this->commandHandlers = new \ArrayObject();
         $this->textHandlers = new \ArrayObject();
+        $this->locationHandlers = new \ArrayObject();
+        $this->genericHandlers = new \ArrayObject();
         // registra gli handlers dei messaggi
         $this->registerHandlers($config);
 
@@ -174,6 +182,28 @@ class Controller
     }
 
 
+    /**
+     * @param string $handler classname of handler
+     */
+    public function registerLocationHandler($handler)
+    {
+        $key = md5($handler);
+        if (!$this->locationHandlers->offsetExists($key)) {
+            $this->locationHandlers->offsetSet($key, $handler);
+        }
+    }
+
+    /**
+     * @param GenericHandler $handler
+     */
+    public function registerGenericHandler(GenericHandler $handler)
+    {
+        $key = md5($handler);
+        if (!$this->genericHandlers->offsetExists($key)) {
+            $this->genericHandlers->offsetSet($key, $handler);
+        }
+    }
+
 
 
     /**
@@ -226,6 +256,12 @@ class Controller
         }
         elseif ($message->hasText()) {
             return $this->handleText($update);
+        }
+        elseif ($message->hasLocation()) {
+            return $this->handleLocation();
+        }
+        else {
+            return $this->handleGeneric();
         }
 
     }
@@ -339,6 +375,41 @@ class Controller
                 if (false === $handler->handleChosenInlineResult($update)) {
                     break;
                 }
+            }
+        }
+    }
+
+
+    /**
+     * Handle Location sent to Bot
+     *
+     * @param Update $update
+     * @param $command
+     */
+    protected function handleLocation(Update $update)
+    {
+        foreach ($this->locationHandlers as $handlerClassname) {
+            /** @var \Gr77\Command\LocationHandler $handler */
+            $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+            if (false === $handler->handleLocation($update)) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Handle generic message sent to bot
+     *
+     * @param Update $update
+     * @param $command
+     */
+    protected function handleGeneric(Update $update)
+    {
+        foreach ($this->genericHandlers as $handlerClassname) {
+            /** @var \Gr77\Command\GenericHandler $handler */
+            $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+            if (false === $handler->handleGeneric($update)) {
+                break;
             }
         }
     }

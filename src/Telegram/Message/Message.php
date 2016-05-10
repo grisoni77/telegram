@@ -296,9 +296,20 @@ class Message
         return false;
     }
 
+    /**
+     * @return bool
+     */
     public function hasText()
     {
         return isset($this->text);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasLocation()
+    {
+        return isset($this->location);
     }
 
     /**

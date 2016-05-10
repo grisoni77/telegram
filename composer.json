@@ -14,7 +14,11 @@
     },
     "require": {
         "guzzle/guzzle": "v3.8.1",
-        "joomla/string": "~1.0"
+        "joomla/string": "~1.0",
+        "psr/log": "1.0.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
     },
     "suggest": {
         "jms/serializer": "0.16.0"
