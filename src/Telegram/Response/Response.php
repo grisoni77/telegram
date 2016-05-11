@@ -87,18 +87,19 @@ abstract class Response
 
     public static function handleException(BadResponseException $e)
     {
-        if ($e->getCode() == 403) {
+        $code = $e->getResponse()->getStatusCode();
+        if ($code == 403) {
             return new Forbidden(array(
                 "ok" => false,
                 "error_code" => 403,
-                "description" => $e->getMessage(),
+                "result" => $e->getMessage(),
             ));
         }
         else {
-            return new Forbidden(array(
+            return new Error(array(
                 "ok" => false,
                 "error_code" => $e->getCode(),
-                "description" => $e->getMessage(),
+                "description" => $e->getCode()." ".$e->getMessage(),
             ));
         }
     }

@@ -14,12 +14,32 @@ namespace Gr77\Telegram\Response;
 
 class Forbidden extends Response
 {
+    /**
+     * @var string
+     */
+    private $response;
+
+    public function __construct(array $data)
+    {
+        parent::__construct($data);
+        if (!isset($this->description) && empty($this->description)) {
+            $this->description = "Forbidden..user probably stopped this bot";
+        }
+    }
 
     /**
      * @param $result result field in telegram response
      */
     protected function parseResult($result)
     {
-        // TODO: Implement parseResult() method.
+        $this->response = $result;
+    }
+
+    /**
+     * @return string
+     */
+    public function getResponse()
+    {
+        return $this->response;
     }
 }
