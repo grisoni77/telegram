@@ -11,6 +11,8 @@
 namespace Gr77\Telegram\Response;
 
 
+use Guzzle\Http\Exception\BadResponseException;
+
 abstract class Response
 {
     /** @var  bool */
@@ -81,5 +83,23 @@ abstract class Response
     public function getErrorCode()
     {
         return $this->error_code;
+    }
+
+    public static function handleException(BadResponseException $e)
+    {
+        if ($e->getCode() == 403) {
+            return new Forbidden(array(
+                "ok" => false,
+                "error_code" => 403,
+                "description" => $e->getMessage(),
+            ));
+        }
+        else {
+            return new Forbidden(array(
+                "ok" => false,
+                "error_code" => $e->getCode(),
+                "description" => $e->getMessage(),
+            ));
+        }
     }
 }

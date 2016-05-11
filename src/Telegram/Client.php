@@ -7,7 +7,9 @@ use Gr77\Telegram\ReplyMarkup\ReplyMarkup;
 use Gr77\Telegram\Request\Serializer;
 use Gr77\Telegram\Response\Boolean;
 use Gr77\Telegram\Response\Error;
+use Gr77\Telegram\Response\Forbidden;
 use Gr77\Telegram\Response\Message;
+use Gr77\Telegram\Response\Response;
 use Gr77\Telegram\Response\Updates;
 use Guzzle\Http\Exception\BadResponseException;
 use Psr\Log\LoggerInterface;
@@ -242,6 +244,7 @@ class Client
 //            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
+            return Response::handleException($e);
         }
     }
 
@@ -312,6 +315,7 @@ class Client
 //            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
+            return Response::handleException($e);
         }
     }
 
@@ -351,6 +355,7 @@ class Client
 //            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
+            return Response::handleException($e);
         }
     }
 
@@ -411,6 +416,7 @@ class Client
 //            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
+            return Response::handleException($e);
         }
     }
 
@@ -450,6 +456,7 @@ class Client
 //            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
+            return Response::handleException($e);
         }
     }
 
