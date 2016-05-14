@@ -12,6 +12,7 @@ namespace Gr77\Telegram;
 
 
 use Gr77\Telegram\CallbackQuery\CallbackQuery;
+use Gr77\Telegram\InlineQuery\ChosenInlineResult;
 use Gr77\Telegram\InlineQuery\InlineQuery;
 use Gr77\Telegram\Message\Message;
 

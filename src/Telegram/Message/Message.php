@@ -14,6 +14,7 @@ namespace Gr77\Telegram\Message;
 
 use Gr77\Telegram\Chat\Chat;
 use Gr77\Telegram\Message\Content\Location;
+use Gr77\Telegram\Message\Content\PhotoSize;
 use Gr77\Telegram\Message\Entity\BotCommand;
 use Gr77\Telegram\Message\Entity\MessageEntity;
 use Gr77\Telegram\User;
@@ -65,6 +66,11 @@ class Message
      * @var Content\Location
      */
     private $location;
+    /**
+     * Optional. Message is a photo, available sizes of the photo
+     * @var PhotoSize[]
+     */
+    private $photo;
 
     private $data;
 
@@ -95,6 +101,12 @@ class Message
         }
         if (isset($data["location"])) {
             $message->setLocation(Location::mapFromArray($data["location"]));
+        }
+        if (isset($data["photo"]) && is_array($data["photo"]) && count($data["photo"])>0) {
+            $message->setPhoto(new \ArrayObject());
+            foreach ($data["photo"] as $photosize) {
+                $message->addPhotosize(PhotoSize::mapFromArray($photosize));
+            }
         }
 
         $message->setData($data);
@@ -226,6 +238,35 @@ class Message
         $this->entities->append($entity);
         return $this;
     }
+
+    /**
+     * @return Content\PhotoSize[]
+     */
+    public function getPhoto()
+    {
+        return $this->photo;
+    }
+
+    /**
+     * @param Content\PhotoSize[] $photo
+     * @return Message
+     */
+    public function setPhoto($photo)
+    {
+        $this->photo = $photo;
+        return $this;
+    }
+
+    /**
+     * @param PhotoSize $photosize
+     * @return $this
+     */
+    public function addPhotosize(PhotoSize $photosize)
+    {
+        $this->photo->append($photosize);
+        return $this;
+    }
+
 
     /**
      * @return string

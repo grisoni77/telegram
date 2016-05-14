@@ -13,7 +13,6 @@ namespace Gr77\Telegram\Response;
 
 class Error extends Response
 {
-
     /**
      * @param $result result field in telegram response
      */

@@ -1,6 +1,7 @@
 <?php
 namespace Gr77\Telegram;
 
+use Gr77\Telegram\Message\Content\InputFile;
 use Gr77\Telegram\Message\Content\Location;
 use Gr77\Telegram\Message\Content\Text;
 use Gr77\Telegram\ReplyMarkup\ReplyMarkup;
@@ -219,7 +220,7 @@ class Client
             }
             if (isset($parse_mode)) {
                 $body["parse_mode"] = $parse_mode;
-            } elseif (isset($text) && ($text instanceof Text)) {
+            } elseif (isset($text)) {
                 $body["parse_mode"] = $text->getParseMode();
             }
             if (isset($disable_web_page_preview)) {
@@ -320,6 +321,78 @@ class Client
     }
 
     /**
+     * Use this method to send photos. On success, the sent Message is returned.
+     * @param int|string $chat_id Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+     * @param InputFile|string $photo Photo to send. You can either pass a file_id as String to resend a photo that is already on the Telegram servers, or upload a new photo using multipart/form-data.
+     * @param string $caption Optional. Photo caption (may also be used when resending photos by file_id), 0-200 characters
+     * @param $disable_notification Optional. Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
+     * @param $reply_to_message_id Optional. If the message is a reply, ID of the original message
+     * @param $reply_markup Optional. Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to hide reply keyboard or to force a reply from the user.
+     * @return Message
+     * @see https://core.telegram.org/bots/api#sendphoto
+     */
+    public function sendPhoto(
+        $chat_id,
+        $photo,
+        $caption = null,
+        $disable_notification = null,
+        $reply_to_message_id = null,
+        $reply_markup = null
+    )
+    {
+        try {
+            $body = array(
+                "chat_id" => $chat_id,
+            );
+            if (isset($caption)) {
+                $body["caption"] = $caption;
+            }
+            if (isset($disable_notification)) {
+                $body["disable_notification"] = $disable_notification;
+            }
+            if (isset($reply_to_message_id)) {
+                $body["reply_to_message_id"] = $reply_to_message_id;
+            }
+            if (isset($reply_markup)) {
+                $body["reply_markup"] = $reply_markup->toArray();
+            }
+            if ($photo instanceof InputFile) {
+//                $request = $this->httpClient->post('sendPhoto');
+//                $request
+//                    ->addPostFiles(array("photo" => $photo->getData()))
+//                    ->addPostFields(json_decode(json_encode($body), true));
+                $bot_url    = $this->httpClient->getBaseUrl();
+                $ch = curl_init($bot_url.'sendPhoto');
+                $cfile = new \CURLFile($photo->getFileName());
+                $data = array(
+                    'chat_id' => $chat_id,
+                    'photo' => $cfile ,
+                    'caption' => 'testing'
+                );
+                curl_setopt($ch, CURLOPT_POST,1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $res = curl_exec($ch);
+                $res = json_decode($res, true);
+            } else {
+                $request = $this->httpClient->post('sendPhoto');
+                $body["photo"] = $photo;
+                $request->setHeader('Content-Type', 'application/json');
+                $request->setBody($this->toJson($body));
+                $res = $request->send()->json();
+            }
+            return new Message($res);
+        } catch (BadResponseException $e) {
+            echo $e->getMessage();
+//            print_r($e->getResponse());
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
+            return Response::handleException($e);
+        }
+    }
+
+    /**
      * Use this method to send answers to callback queries sent from inline keyboards. The answer will be displayed to
      * the user as a notification at the top of the chat screen or as an alert. On success, True is returned.
      *
@@ -349,7 +422,11 @@ class Client
             $request->setHeader('Content-Type', 'application/json');
             $request->setBody($this->toJson($body));
             $res = $request->send()->json();
-            return new Message($res);
+            if ($res['ok']) {
+                return new Boolean($res);
+            } else {
+                return new Error($res);
+            }
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
@@ -397,7 +474,7 @@ class Client
             }
             if (isset($parse_mode)) {
                 $body["parse_mode"] = $parse_mode;
-            } elseif (isset($text) && (!($text instanceof Text))) {
+            } else {
                 $body["parse_mode"] = $text->getParseMode();
             }
             if (isset($disable_web_page_preview)) {
@@ -446,6 +523,21 @@ class Client
                 "results" => $results,
                 //"myField" => "prova",
             );
+            if (isset($cache_time)) {
+                $body["chat_id"] = $cache_time;
+            }
+            if (isset($is_personal)) {
+                $body["chat_id"] = $is_personal;
+            }
+            if (isset($next_offset)) {
+                $body["chat_id"] = $next_offset;
+            }
+            if (isset($switch_pm_text)) {
+                $body["chat_id"] = $switch_pm_text;
+            }
+            if (isset($switch_pm_parameter)) {
+                $body["chat_id"] = $switch_pm_parameter;
+            }
             $request = $this->httpClient->post('answerInlineQuery');
             $request->setHeader('Content-Type', 'application/json');
             $request->setBody($this->toJson($body));
