@@ -524,25 +524,29 @@ class Client
                 //"myField" => "prova",
             );
             if (isset($cache_time)) {
-                $body["chat_id"] = $cache_time;
+                $body["cache_time"] = $cache_time;
             }
             if (isset($is_personal)) {
-                $body["chat_id"] = $is_personal;
+                $body["is_personal"] = $is_personal;
             }
             if (isset($next_offset)) {
-                $body["chat_id"] = $next_offset;
+                $body["next_offset"] = $next_offset;
             }
             if (isset($switch_pm_text)) {
-                $body["chat_id"] = $switch_pm_text;
+                $body["switch_pm_text"] = $switch_pm_text;
             }
             if (isset($switch_pm_parameter)) {
-                $body["chat_id"] = $switch_pm_parameter;
+                $body["switch_pm_parameter"] = $switch_pm_parameter;
             }
             $request = $this->httpClient->post('answerInlineQuery');
             $request->setHeader('Content-Type', 'application/json');
             $request->setBody($this->toJson($body));
             $res = $request->send()->json();
-            return new Message($res);
+            if ($res['ok']) {
+                return new Boolean($res);
+            } else {
+                return new Error($res);
+            }
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
