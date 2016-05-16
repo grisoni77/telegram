@@ -86,6 +86,17 @@ abstract class Base implements Handler
         }
     }
 
+    protected function unsetState($var)
+    {
+        if (isset($_SESSION)) {
+            if (isset($_SESSION[$var])) {
+                unset($_SESSION[$var]);
+            }
+        } else {
+            throw new \BadMethodCallException("Session is not initialized");
+        }
+    }
+
     protected function getState($var, $default = null)
     {
         if (isset($_SESSION)) {
