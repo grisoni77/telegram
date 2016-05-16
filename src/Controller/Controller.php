@@ -238,12 +238,43 @@ class Controller
     }
 
     /**
+     * Init session based on chat_id
+     * @param Update $update
+     */
+    private function initChatSession(Update $update)
+    {
+        $session_id = $update->getMessage()->getChat()->getId();
+        session_id($session_id);
+        session_start();
+    }
+
+    /**
+     * Check for handler waiting for answer
+     * @return bool
+     */
+    private function isHandlerWaitingForAnswer()
+    {
+        if (!isset($_SESSION)) {
+            return false;
+        } else {
+            if (isset($_SESSION["handler_waiting"])){
+                return true;
+            }
+        }
+    }
+
+    /**
      * Gestisce risposta da Telegram api
      *
      * @param Response $response
      */
     public function handleUpdate(Update $update)
     {
+        $this->initChatSession($update);
+
+        if ($this->isHandlerWaitingForAnswer()) {
+            return $this->handleWaitedAnswer($update);
+        }
         if ($update->hasMessage()) {
             return $this->handleMessage($update);
         }
@@ -428,5 +459,21 @@ class Controller
                 break;
             }
         }
+    }
+
+
+    /**
+     * Handle generic message sent to bot
+     *
+     * @param Update $update
+     * @param $command
+     */
+    protected function handleWaitedAnswer(Update $update)
+    {
+        $handler_waiting =  $_SESSION["handler_waiting"];
+        $handlerClassname = $this->config_bot["handler_namespace"].$handler_waiting;
+        /** @var \Gr77\Command\AnswerHandler $handler */
+        $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+        return $handler->handleAnswer($update);
     }
 }
