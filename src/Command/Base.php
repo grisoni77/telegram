@@ -98,4 +98,10 @@ abstract class Base implements Handler
             throw new \BadMethodCallException("Session is not initialized");
         }
     }
+
+    protected function setWaitingAnswer()
+    {
+        $class = $this->getClassName();
+        $_SESSION["handler_waiting"] = $class;
+    }
 }
