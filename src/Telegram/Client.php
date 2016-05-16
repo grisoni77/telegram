@@ -394,6 +394,73 @@ class Client
     }
 
     /**
+     * Use this method to send .webp stickers. On success, the sent Message is returned.
+     * @param int|string $chat_id Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+     * @param InputFile|string $sticker Sticker to send. You can either pass a file_id as String to resend a sticker that is already on the Telegram servers, or upload a new sticker using multipart/form-data.
+     * @param $disable_notification Optional. Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
+     * @param $reply_to_message_id Optional. If the message is a reply, ID of the original message
+     * @param $reply_markup Optional. Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to hide reply keyboard or to force a reply from the user.
+     * @return Message
+     * @see https://core.telegram.org/bots/api#sendsticker
+     */
+    public function sendSticker(
+        $chat_id,
+        $sticker,
+        $disable_notification = null,
+        $reply_to_message_id = null,
+        $reply_markup = null
+    )
+    {
+        try {
+            $body = array(
+                "chat_id" => $chat_id,
+            );
+            if (isset($disable_notification)) {
+                $body["disable_notification"] = $disable_notification;
+            }
+            if (isset($reply_to_message_id)) {
+                $body["reply_to_message_id"] = $reply_to_message_id;
+            }
+            if (isset($reply_markup)) {
+                $body["reply_markup"] = $reply_markup->toArray();
+            }
+            if ($sticker instanceof InputFile) {
+//                $request = $this->httpClient->post('sendPhoto');
+//                $request
+//                    ->addPostFiles(array("photo" => $photo->getData()))
+//                    ->addPostFields(json_decode(json_encode($body), true));
+                $bot_url    = $this->httpClient->getBaseUrl();
+                $ch = curl_init($bot_url.'sendSticker');
+//                $cfile = new \CURLFile($photo->getFileName());
+                $data = array(
+                    'chat_id' => $chat_id,
+//                    'photo' => $cfile ,
+                    'sticker' => '@' . realpath($sticker->getData()) . ';filename='.$sticker->getData(),
+                    'caption' => 'testing'
+                );
+                curl_setopt($ch, CURLOPT_POST,1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $res = curl_exec($ch);
+                $res = json_decode($res, true);
+            } else {
+                $request = $this->httpClient->post('sendSticker');
+                $body["sticker"] = $sticker;
+                $request->setHeader('Content-Type', 'application/json');
+                $request->setBody($this->toJson($body));
+                $res = $request->send()->json();
+            }
+            return new Message($res);
+        } catch (BadResponseException $e) {
+            echo $e->getMessage();
+//            print_r($e->getResponse());
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
+            return Response::handleException($e);
+        }
+    }
+    /**
      * Use this method to send answers to callback queries sent from inline keyboards. The answer will be displayed to
      * the user as a notification at the top of the chat screen or as an alert. On success, True is returned.
      *
