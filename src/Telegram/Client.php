@@ -363,10 +363,11 @@ class Client
 //                    ->addPostFields(json_decode(json_encode($body), true));
                 $bot_url    = $this->httpClient->getBaseUrl();
                 $ch = curl_init($bot_url.'sendPhoto');
-                $cfile = new \CURLFile($photo->getFileName());
+//                $cfile = new \CURLFile($photo->getFileName());
                 $data = array(
                     'chat_id' => $chat_id,
-                    'photo' => $cfile ,
+//                    'photo' => $cfile ,
+                    'photo' => '@' . realpath($photo->getData()) . ';filename='.$photo->getData(),
                     'caption' => 'testing'
                 );
                 curl_setopt($ch, CURLOPT_POST,1);
