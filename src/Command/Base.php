@@ -23,6 +23,8 @@ abstract class Base implements Handler
     /** @var  array config bot */
     protected $config;
 
+    protected $session;
+
     /**
      * Base constructor.
      * @param Client $client
@@ -57,5 +59,20 @@ abstract class Base implements Handler
      */
     public static function getClassName() {
         return get_called_class();
+    }
+
+    protected function initSession($session_id)
+    {
+        session_id($session_id);
+        $this->session = $_SESSION;
+        return $this->session;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSession()
+    {
+        return $this->session;
     }
 }
