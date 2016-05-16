@@ -64,6 +64,7 @@ abstract class Base implements Handler
     protected function initSession($session_id)
     {
         session_id($session_id);
+        session_start();
         $this->session = $_SESSION;
         return $this->session;
     }
@@ -71,8 +72,30 @@ abstract class Base implements Handler
     /**
      * @return mixed
      */
-    public function getSession()
+    protected function getSession()
     {
         return $this->session;
+    }
+
+    protected function setState($var, $value)
+    {
+        if (isset($_SESSION)) {
+            $_SESSION[$var] = $value;
+        } else {
+            throw new \BadMethodCallException("Session is not initialized");
+        }
+    }
+
+    protected function getState($var, $default = null)
+    {
+        if (isset($_SESSION)) {
+            if (isset($_SESSION[$var])) {
+                return $_SESSION[$var];
+            } else {
+                return $default;
+            }
+        } else {
+            throw new \BadMethodCallException("Session is not initialized");
+        }
     }
 }
