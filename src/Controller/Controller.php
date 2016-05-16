@@ -169,7 +169,7 @@ class Controller
      */
     public function registerTextHandler($text, $handler)
     {
-        $regexp = sprintf("/%s/i", preg_quote($text));
+        $regexp = sprintf("/^%s$/i", preg_quote($text));
         if (!$this->textHandlers->offsetExists($regexp)) {
             $this->textHandlers->offsetSet($regexp, new \ArrayObject());
         }

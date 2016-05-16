@@ -25,12 +25,31 @@ class InlineQueryResultArticle extends InlineQueryResult
      *
      * @var string
      */
-    public $title;
+    private $title;
     /**
-     * Content of the message to be sent
-     * @var \Gr77\Telegram\InlineQuery\Input\InputMessageContent
+     * @var string
      */
-    public $input_message_content;
+    private $url;
+    /**
+     * @var bool
+     */
+    private $hide_url;
+    /**
+     * @var string
+     */
+    private $description;
+    /**
+     * @var string
+     */
+    private $thumb_url;
+    /**
+     * @var int
+     */
+    private $thumb_width;
+    /**
+     * @var int
+     */
+    private $thumb_height;
 
     /**
      * @param array $data
@@ -49,6 +68,24 @@ class InlineQueryResultArticle extends InlineQueryResult
                 $item->input_message_content = $data["input_message_content"];
             }
         }
+        if (isset($data["url"])) {
+            $item->url = $data["url"];
+        }
+        if (isset($data["hide_url"])) {
+            $item->hide_url = $data["hide_url"];
+        }
+        if (isset($data["description"])) {
+            $item->description = $data["description"];
+        }
+        if (isset($data["thumb_url"])) {
+            $item->thumb_url = $data["thumb_url"];
+        }
+        if (isset($data["thumb_width"])) {
+            $item->thumb_width = $data["thumb_width"];
+        }
+        if (isset($data["thumb_height"])) {
+            $item->thumb_height = $data["thumb_height"];
+        }
         return $item;
     }
 
@@ -61,11 +98,34 @@ class InlineQueryResultArticle extends InlineQueryResult
      */
     function jsonSerialize()
     {
-        return array(
+        $data = array(
             "id" => $this->id,
             "type" => $this->type,
             "title" => $this->title,
             "input_message_content" => $this->input_message_content,
         );
+        if (isset($this->reply_markup)) {
+            $data["reply_markup"] = $this->reply_markup;
+        }
+        if (isset($this->url)) {
+            $data["url"] = $this->url;
+        }
+        if (isset($this->hide_url)) {
+            $data["hide_url"] = $this->hide_url;
+        }
+        if (isset($this->description)) {
+            $data["description"] = $this->description;
+        }
+        if (isset($this->thumb_url)) {
+            $data["thumb_url"] = $this->thumb_url;
+        }
+        if (isset($this->thumb_width)) {
+            $data["thumb_width"] = $this->thumb_width;
+        }
+        if (isset($this->thumb_height)) {
+            $data["thumb_height"] = $this->thumb_height;
+        }
+
+        return $data;
     }
 }

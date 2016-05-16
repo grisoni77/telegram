@@ -18,22 +18,22 @@ abstract class InlineQueryResult implements \JsonSerializable
      * Type of the result, must be article
      * @var string
      */
-    public $type;
+    protected $type;
     /**
      * Unique identifier for this result, 1-64 Bytes
      * @var string
      */
-    public $id;
+    protected $id;
     /**
      * Optional. Inline keyboard attached to the message
      * @var \Gr77\Telegram\ReplyMarkup\InlineKeyboardMarkup
      */
-    public $reply_markup;
+    protected $reply_markup;
     /**
      * Optional. Content of the message to be sent instead of the contact
      * @var \Gr77\Telegram\InlineQuery\Input\InputMessageContent
      */
-    public $input_message_content;
+    protected $input_message_content;
 
     /**
      * InlineQueryResult constructor.
