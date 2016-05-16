@@ -243,7 +243,18 @@ class Controller
      */
     private function initChatSession(Update $update)
     {
-        $session_id = $update->getMessage()->getChat()->getId();
+        if ($update->hasMessage()) {
+            $session_id = $update->getMessage()->getChat()->getId();
+        }
+        elseif ($update->hasCallbackQuery()) {
+            $session_id = $update->getCallbackQuery()->getMessage()->getChat()->getId();
+        }
+        elseif ($update->hasInlineQuery()) {
+            $session_id = $update->getInlineQuery()->getFrom()->getId();
+        }
+        elseif ($update->hasChosenInlineResult()) {
+            $session_id = $update->getChosenInlineResult()->getFrom()->getId();
+        }
         session_id($session_id);
         session_start();
     }
