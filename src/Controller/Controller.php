@@ -73,7 +73,7 @@ class Controller
         }
 
         // config session type
-        if (!isset($config["session_type"])) {
+        if (!isset($this->config_bot["session_type"])) {
             $this->config_bot["session_type"] = "null";
         }
     }
