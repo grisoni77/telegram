@@ -28,9 +28,9 @@ class PhpSession implements Session
     public function __construct($session_id, $token)
     {
         if (!isset($_SESSION)) {
-            session_id($session_id);
+            session_id($session_id.$token);
             session_start();
-            $_SESSION[$token] = array();
+            $_SESSION = array();
             $this->token = $token;
         } else {
             throw new \BadMethodCallException("Session already initiated", 500);
@@ -44,7 +44,7 @@ class PhpSession implements Session
      */
     public function set($var, $value)
     {
-        $_SESSION[$this->token][$var] = $value;
+        $_SESSION[$var] = $value;
         return $this;
     }
 
@@ -54,8 +54,8 @@ class PhpSession implements Session
      */
     public function get($var, $default = null)
     {
-        if (isset($_SESSION[$this->token][$var])) {
-            return $_SESSION[$this->token][$var];
+        if (isset($_SESSION[$var])) {
+            return $_SESSION[$var];
         }
         return $default;
     }
@@ -66,7 +66,7 @@ class PhpSession implements Session
      */
     public function delete($var)
     {
-        unset($_SESSION[$this->token][$var]);
+        unset($_SESSION[$var]);
     }
 
 }
