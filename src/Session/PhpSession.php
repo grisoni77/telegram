@@ -28,7 +28,7 @@ class PhpSession implements Session
     public function __construct($session_id, $token)
     {
         if (!isset($_SESSION)) {
-            session_id($session_id.$token);
+            session_id(md5($session_id.$token));
             session_start();
             $_SESSION = array();
             $this->token = $token;
