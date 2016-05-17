@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 interface Handler
 {
     /**
-     * Ritorna un'istanza di questo handler
+     * Returns Handler concrete instance
      * @return Handler
      */
     public static function provide(Client $client, $config = array(), LoggerInterface $logger = null);

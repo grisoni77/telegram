@@ -13,6 +13,9 @@ namespace Gr77\Controller;
 
 use Gr77\Command\GenericHandler;
 use Gr77\Command\LocationHandler;
+use Gr77\Session\NullSession;
+use Gr77\Session\Session;
+use Gr77\Session\SessionFactory;
 use Gr77\Telegram\ReplyMarkup\InlineKeyboardButtonCallbackQuery;
 use Gr77\Telegram\Response\Response;
 use Gr77\Telegram\Response\Updates;
@@ -38,7 +41,8 @@ class Controller
     protected $genericHandlers;
     /** @var  array config specific for bot */
     protected $config_bot = array();
-
+    /** @var  Session */
+    protected $session;
 
     /**
      * Controller constructor.
@@ -66,6 +70,11 @@ class Controller
         // config bot
         if (isset($config["config_bot"])) {
             $this->config_bot = $config["config_bot"];
+        }
+
+        // config session type
+        if (!isset($config["session_type"])) {
+            $this->config_bot["session_type"] = "null";
         }
     }
 
@@ -243,20 +252,10 @@ class Controller
      */
     private function initChatSession(Update $update)
     {
-        if ($update->hasMessage()) {
-            $session_id = $update->getMessage()->getChat()->getId();
-        }
-        elseif ($update->hasCallbackQuery()) {
-            $session_id = $update->getCallbackQuery()->getMessage()->getChat()->getId();
-        }
-        elseif ($update->hasInlineQuery()) {
-            $session_id = $update->getInlineQuery()->getFrom()->getId();
-        }
-        elseif ($update->hasChosenInlineResult()) {
-            $session_id = $update->getChosenInlineResult()->getFrom()->getId();
-        }
-        session_id($session_id);
-        session_start();
+        $session_id = $this->getSessionId($update);
+//        session_id($session_id);
+//        session_start();
+        $this->session = SessionFactory::create($session_id, $this->config_bot["session_type"], $this->token);
     }
 
     /**
@@ -265,13 +264,8 @@ class Controller
      */
     private function isHandlerWaitingForAnswer()
     {
-        if (!isset($_SESSION)) {
-            return false;
-        } else {
-            if (isset($_SESSION["handler_waiting"])){
-                return true;
-            }
-        }
+        $handler_waiting = $this->session->get("handler_waiting");
+        return isset($handler_waiting);
     }
 
     /**
@@ -338,7 +332,7 @@ class Controller
             $handlers = $this->getCommandHandlers($text);
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
-                $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+                $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
                 if (false === $handler->handleCommand($update)) {
                     break;
                 }
@@ -359,7 +353,7 @@ class Controller
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
                 /** @var \Gr77\Command\TextHandler $handler */
-                $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+                $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
                 if (false === $handler->handleText($update)) {
                     break;
                 }
@@ -385,7 +379,7 @@ class Controller
         $methodName = "handle".ucfirst($method);
         if (class_exists($className)) {
             /** @var \Gr77\Command\CommandHandler $handler */
-            $handler = $className::provide($this->client, $this->config_bot, $this->logger);
+            $handler = $className::provide($this->client, $this->session, $this->config_bot, $this->logger);
             if (method_exists($handler, $methodName)) {
                 return call_user_func(array($handler, $methodName), $update);
             }
@@ -407,7 +401,7 @@ class Controller
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
                 /** @var \Gr77\Command\InlineQueryHandler $handler */
-                $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+                $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
                 if (false === $handler->handleInlineQuery($update)) {
                     break;
                 }
@@ -429,7 +423,7 @@ class Controller
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
                 /** @var \Gr77\Command\InlineQueryHandler $handler */
-                $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+                $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
                 if (false === $handler->handleChosenInlineResult($update)) {
                     break;
                 }
@@ -448,7 +442,7 @@ class Controller
     {
         foreach ($this->locationHandlers as $handlerClassname) {
             /** @var \Gr77\Command\LocationHandler $handler */
-            $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+            $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
             if (false === $handler->handleLocation($update)) {
                 break;
             }
@@ -465,7 +459,7 @@ class Controller
     {
         foreach ($this->genericHandlers as $handlerClassname) {
             /** @var \Gr77\Command\GenericHandler $handler */
-            $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+            $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
             if (false === $handler->handleGeneric($update)) {
                 break;
             }
@@ -481,11 +475,33 @@ class Controller
      */
     protected function handleWaitedAnswer(Update $update)
     {
-        $handler_waiting =  $_SESSION["handler_waiting"];
-        unset($_SESSION["handler_waiting"]);
+        $handler_waiting =  $this->session->get("handler_waiting");
+        $this->session->unset("handler_waiting");
         $handlerClassname = $handler_waiting;
         /** @var \Gr77\Command\AnswerHandler $handler */
-        $handler = $handlerClassname::provide($this->client, $this->config_bot, $this->logger);
+        $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
         return $handler->handleAnswer($update);
+    }
+
+    /**
+     * @param Update $update
+     * @return int
+     */
+    private function getSessionId(Update $update)
+    {
+        if ($update->hasMessage()) {
+            $session_id = $update->getMessage()->getChat()->getId();
+            return $session_id;
+        } elseif ($update->hasCallbackQuery()) {
+            $session_id = $update->getCallbackQuery()->getMessage()->getChat()->getId();
+            return $session_id;
+        } elseif ($update->hasInlineQuery()) {
+            $session_id = $update->getInlineQuery()->getFrom()->getId();
+            return $session_id;
+        } elseif ($update->hasChosenInlineResult()) {
+            $session_id = $update->getChosenInlineResult()->getFrom()->getId();
+            return $session_id;
+        }
+        return $session_id;
     }
 }

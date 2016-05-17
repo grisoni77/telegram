@@ -10,6 +10,7 @@
 
 namespace Gr77\Command;
 
+use Gr77\Session\Session;
 use Gr77\Telegram\Client;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -28,10 +29,11 @@ abstract class Base implements Handler
     /**
      * Base constructor.
      * @param Client $client
-     * @param LoggerInterface|null $logger
+     * @param Session $session
      * @param array $config
+     * @param LoggerInterface|null $logger
      */
-    public function __construct(Client $client, $config = array(), LoggerInterface $logger = null)
+    public function __construct(Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
         $this->client = $client;
         if (null == $logger) {
@@ -40,17 +42,19 @@ abstract class Base implements Handler
             $this->logger = $logger;
         }
         $this->config = $config;
+        $this->session = $session;
     }
 
     /**
      * @param Client $client
-     * @param LoggerInterface|null $logger
+     * @param Session $session
      * @param array $config
+     * @param LoggerInterface|null $logger
      * @return static
      */
-    public static function provide(Client $client, $config = array(), LoggerInterface $logger = null)
+    public static function provide(Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        $handler = new static($client, $config, $logger);
+        $handler = new static($client, $session, $config, $logger);
         return $handler;
     }
 
@@ -79,40 +83,22 @@ abstract class Base implements Handler
 
     protected function setState($var, $value)
     {
-        if (isset($_SESSION)) {
-            $_SESSION[$var] = $value;
-        } else {
-            throw new \BadMethodCallException("Session is not initialized");
-        }
+        $this->session->set($var, $value);
     }
 
     protected function unsetState($var)
     {
-        if (isset($_SESSION)) {
-            if (isset($_SESSION[$var])) {
-                unset($_SESSION[$var]);
-            }
-        } else {
-            throw new \BadMethodCallException("Session is not initialized");
-        }
+        $this->session->unset($var);
     }
 
     protected function getState($var, $default = null)
     {
-        if (isset($_SESSION)) {
-            if (isset($_SESSION[$var])) {
-                return $_SESSION[$var];
-            } else {
-                return $default;
-            }
-        } else {
-            throw new \BadMethodCallException("Session is not initialized");
-        }
+        return $this->session->get($var, $default);
     }
 
     protected function setWaitingAnswer()
     {
         $class = $this->getClassName();
-        $_SESSION["handler_waiting"] = $class;
+        $this->setState("handler_waiting", $class);
     }
 }
