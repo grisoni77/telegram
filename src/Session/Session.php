@@ -40,5 +40,5 @@ interface Session
      * @param string $var
      * @return mixed
      */
-    public function unset($var);
+    public function delete($var);
 }

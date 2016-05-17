@@ -476,7 +476,7 @@ class Controller
     protected function handleWaitedAnswer(Update $update)
     {
         $handler_waiting =  $this->session->get("handler_waiting");
-        $this->session->unset("handler_waiting");
+        $this->session->delete("handler_waiting");
         $handlerClassname = $handler_waiting;
         /** @var \Gr77\Command\AnswerHandler $handler */
         $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);

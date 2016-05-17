@@ -88,7 +88,7 @@ abstract class Base implements Handler
 
     protected function unsetState($var)
     {
-        $this->session->unset($var);
+        $this->session->delete($var);
     }
 
     protected function getState($var, $default = null)
