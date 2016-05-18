@@ -11,7 +11,7 @@
 namespace Gr77\Telegram\ReplyMarkup;
 
 
-class KeyboardButtonRow extends \ArrayObject
+class KeyboardButtonRow extends \ArrayObject implements \JsonSerializable
 {
 
     /**
@@ -29,4 +29,18 @@ class KeyboardButtonRow extends \ArrayObject
     {
         $this->prepend($button);
     }
+
+    /**
+     * @return mixed
+     */
+    function jsonSerialize()
+    {
+        $data = array();
+        foreach ($this->getArrayCopy() as $item) {
+            $data[] = $item;
+        }
+        return $data;
+    }
+
+
 }
