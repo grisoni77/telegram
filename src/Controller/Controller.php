@@ -400,10 +400,10 @@ class Controller
             "thread_id" => $this->session->getSessionId(),
         ));
         $message = json_decode((string) $response->getBody(), true);
-        if (isset($message["outcomes"][0]["entities"]["Intent"])) {
+        if (isset($message["entities"]["Intent"])) {
             $confidence = 0;
             $intentType = null;
-            foreach ($message["outcomes"][0]["entities"]["Intent"] as $item) {
+            foreach ($message["entities"]["Intent"] as $item) {
                 if ($item["confidence"] > $confidence) {
                     $intentType = $item["value"];
                     $confidence = $item["confidence"];
