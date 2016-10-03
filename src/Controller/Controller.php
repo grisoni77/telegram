@@ -394,7 +394,7 @@ class Controller
             }
         }
         // handle user intent wit.ai api
-        $witaiClient = new Client("AH3COYEV7SOD3H4IISYBIV3IM3TN6DSC");
+        $witaiClient = new Client(WIT_AI_API_SECRET);
         $response = $witaiClient->get("/message", array(
             "q" => $text,
             "thread_id" => $this->session->getSessionId(),
