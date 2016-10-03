@@ -12,6 +12,8 @@ namespace Gr77\Controller;
 
 
 use Gr77\Command\GenericHandler;
+use Gr77\Command\Intent\WitAiIntent;
+use Gr77\Command\IntentHandler;
 use Gr77\Command\LocationHandler;
 use Gr77\Session\NullSession;
 use Gr77\Session\Session;
@@ -22,6 +24,8 @@ use Gr77\Telegram\Response\Updates;
 use Gr77\Telegram\Update;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Tgallice\Wit\Api;
+use Tgallice\Wit\Client;
 
 class Controller
 {
@@ -64,6 +68,7 @@ class Controller
         $this->textHandlers = new \ArrayObject();
         $this->locationHandlers = new \ArrayObject();
         $this->genericHandlers = new \ArrayObject();
+        $this->intentHandlers = new \ArrayObject();
         // registra gli handlers dei messaggi
         $this->registerHandlers($config);
 
@@ -124,6 +129,14 @@ class Controller
                 settype($genericHandlers, 'array');
                 foreach ($genericHandlers as $handler) {
                     $this->registerLocationHandler($handler);
+                }
+            }
+        }
+        if (isset($config["intentHandlers"]) && is_array($config["intentHandlers"]) && count($config["intentHandlers"])>0) {
+            foreach ($config["intentHandlers"] as $intent => $intentHandlers) {
+                settype($intentHandlers, 'array');
+                foreach ($intentHandlers as $handler) {
+                    $this->registerIntentHandler($intent, $handler);
                 }
             }
         }
@@ -227,6 +240,27 @@ class Controller
         if (!$this->genericHandlers->offsetExists($key)) {
             $this->genericHandlers->offsetSet($key, $handler);
         }
+    }
+
+    /**
+     * @param string $intent
+     * @param string $handler
+     */
+    public function registerIntentHandler($intent, $handler)
+    {
+        if (!$this->intentHandlers->offsetExists($intent)) {
+            $this->intentHandlers->offsetSet($intent, new \ArrayObject());
+        }
+        $this->intentHandlers[$intent]->append($handler);
+    }
+
+    /**
+     * @param string $intent
+     * @return \ArrayObject|bool ritorna false se non ci sono handler per questo intent
+     */
+    protected function getIntentHandlers($intent)
+    {
+        return $this->intentHandlers->offsetGet($intent);
     }
 
 
@@ -356,6 +390,34 @@ class Controller
                 $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
                 if (false === $handler->handleText($update)) {
                     break;
+                }
+            }
+        }
+        // handle user intent wit.ai api
+        $witaiClient = new Client("AH3COYEV7SOD3H4IISYBIV3IM3TN6DSC");
+        $response = $witaiClient->get("/message", array(
+            "q" => $text,
+            "thread_id" => $this->session->getSessionId(),
+        ));
+        $message = json_decode((string) $response->getBody(), true);
+        if (isset($message["outcomes"][0]["entities"]["Intent"])) {
+            $confidence = 0;
+            $intentType = null;
+            foreach ($message["outcomes"][0]["entities"]["Intent"] as $item) {
+                if ($item["confidence"] > $confidence) {
+                    $intentType = $item["value"];
+                    $confidence = $item["confidence"];
+                }
+            }
+            if (isset($intentType) && null !== $handlers = $this->getIntentHandlers($intentType)) {
+                //var_dump($handlers);
+                foreach ($handlers as $handlerClassname) {
+                    /** @var \Gr77\Command\TextHandler $handler */
+                    $handler = $handlerClassname::provide($this->client, $this->session, $this->config_bot, $this->logger);
+                    $intent = new WitAiIntent($intentType, $message);
+                    if (false === $handler->handleIntent($update, $intent)) {
+                        break;
+                    }
                 }
             }
         }
@@ -502,6 +564,6 @@ class Controller
             $session_id = $update->getChosenInlineResult()->getFrom()->getId();
             return $session_id;
         }
-        return $session_id;
+        return session_id();
     }
 }

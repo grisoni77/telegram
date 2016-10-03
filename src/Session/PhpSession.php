@@ -20,6 +20,8 @@ class PhpSession implements Session
      */
     private $token;
 
+    private $session_id = null;
+
     /**
      * PhpSession constructor.
      * @param int $session_id
@@ -28,6 +30,7 @@ class PhpSession implements Session
     public function __construct($session_id, $token)
     {
         if (!isset($_SESSION)) {
+            $this->session_id = $session_id;
             session_id($session_id);
             session_start();
             if (!isset($_SESSION[$token])) {
@@ -37,6 +40,14 @@ class PhpSession implements Session
         } else {
             throw new \BadMethodCallException("Session already initiated", 500);
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSessionId()
+    {
+        return $this->getSessionId();
     }
 
     /**
@@ -70,5 +81,6 @@ class PhpSession implements Session
     {
         unset($_SESSION[$this->token][$var]);
     }
+
 
 }

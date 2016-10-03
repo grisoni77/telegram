@@ -23,6 +23,11 @@ interface Session
 //    public function init($session_id, $config = array());
 
     /**
+     * @return mixed
+     */
+    public function getSessionId();
+
+    /**
      * @param string $var
      * @param mixed $value
      * @return mixed

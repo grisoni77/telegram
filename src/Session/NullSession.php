@@ -50,4 +50,11 @@ class NullSession implements Session
         // TODO: Implement set() method.
     }
 
+    /**
+     * @return mixed
+     */
+    public function getSessionId()
+    {
+        return null;
+    }
 }
