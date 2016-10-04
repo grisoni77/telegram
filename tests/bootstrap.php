@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__. '/../vendor/autoload.php';
+/*
 // autoloader
 $loader = new Symfony\Component\ClassLoader\UniversalClassLoader();
 // You can search the include_path as a last resort.
@@ -11,3 +12,4 @@ $loader->registerNamespaces(array(
 ));
 // run class loader
 $loader->register();
+*/
