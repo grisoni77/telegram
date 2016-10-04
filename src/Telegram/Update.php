@@ -158,7 +158,20 @@ class Update
     }
 
 
-
+    public function getChatId()
+    {
+        if ($this->hasMessage()) {
+            return $this->getMessage()->getChat()->getId();
+        } elseif ($this->hasCallbackQuery()) {
+            return $this->getCallbackQuery()->getMessage()->getChat()->getId();
+        } elseif ($this->hasInlineQuery()) {
+            return  $this->getInlineQuery()->getFrom()->getId();
+        } elseif ($this->hasChosenInlineResult()) {
+            return  $this->getChosenInlineResult()->getFrom()->getId();
+        } else {
+            return false;
+        }
+    }
 
     /**
      * @return bool

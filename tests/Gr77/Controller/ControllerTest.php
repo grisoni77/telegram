@@ -15,8 +15,9 @@ namespace tests\Gr77\Controller;
 use Gr77\Controller\Controller;
 use Gr77\Telegram\Client;
 use Gr77\Telegram\Update;
+use tests\Gr77\TestCase;
 
-class ControllerTest extends \PHPUnit_Framework_TestCase
+class ControllerTest extends TestCase
 {
     public function testGetTextHandlers()
     {
@@ -53,7 +54,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
         $client = $this->getMockBuilder(Client::class)
             ->setConstructorArgs(array(array(),$httpClient, $serializer))
             ->getMock();
-        $controller = new Controller("token", $client);
+        //$controller = new Controller("token", $client);
         $controller = $this->getMockBuilder(Controller::class)
             ->setConstructorArgs(array("token", $client))
             ->getMock();
@@ -68,21 +69,5 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
         $controller->handleUpdate($update);
     }
 
-    /**
-     * Call protected/private method of a class.
-     *
-     * @param object &$object    Instantiated object that we will run method on.
-     * @param string $methodName Method name to call
-     * @param array  $parameters Array of parameters to pass into method.
-     *
-     * @return mixed Method return.
-     */
-    public function invokeMethod(&$object, $methodName, array $parameters = array())
-    {
-        $reflection = new \ReflectionClass(get_class($object));
-        $method = $reflection->getMethod($methodName);
-        $method->setAccessible(true);
 
-        return $method->invokeArgs($object, $parameters);
-    }
 }

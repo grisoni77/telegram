@@ -12,7 +12,7 @@
 namespace Gr77\Telegram\Message\Content;
 
 
-use Joomla\String\StringHelper;
+use Stringy\Stringy as S;
 
 class HtmlText extends Text
 {
@@ -70,7 +70,7 @@ class HtmlText extends Text
             // Deal with spacing issues in the input.
             $text = str_replace('>', '> ', $text);
             $text = str_replace(array('&nbsp;', '&#160;'), ' ', $text);
-            $text = StringHelper::trim(preg_replace('#\s+#mui', ' ', $text));
+            $text = (string) S::create(preg_replace('#\s+#mui', ' ', $text))->trim();
 
             // Strip the tags from the input and decode entities.
             $text = strip_tags($text);
@@ -78,13 +78,13 @@ class HtmlText extends Text
 
             // Remove remaining extra spaces.
             $text = str_replace('&nbsp;', ' ', $text);
-            $text = StringHelper::trim(preg_replace('#\s+#mui', ' ', $text));
+            $text = (string) S::create(preg_replace('#\s+#mui', ' ', $text))->trim();
         }
 
         // Whether or not allowing HTML, truncate the item text if it is too long.
-        if ($length > 0 && StringHelper::strlen($text) > $length)
+        if ($length > 0 && S::create($text)->length() > $length)
         {
-            $tmp = trim(StringHelper::substr($text, 0, $length));
+            $tmp = (string) S::create($text)->substr(0, $length)->trim();
 
             if (substr($tmp, 0, 1) == '<' && strpos($tmp, '>') === false)
             {
@@ -95,8 +95,8 @@ class HtmlText extends Text
             if ($noSplit)
             {
                 // Find the position of the last space within the allowed length.
-                $offset = StringHelper::strrpos($tmp, ' ');
-                $tmp = StringHelper::substr($tmp, 0, $offset + 1);
+                $offset = S::create($tmp)->indexOfLast(' ');
+                $tmp = (string) S::create($tmp)->substr(0, $offset + 1);
 
                 // If there are no spaces and the string is longer than the maximum
                 // we need to just use the ellipsis. In that case we are done.
@@ -105,9 +105,9 @@ class HtmlText extends Text
                     return '...';
                 }
 
-                if (StringHelper::strlen($tmp) > $length - 3)
+                if (S::create($tmp)->length() > $length - 3)
                 {
-                    $tmp = trim(StringHelper::substr($tmp, 0, StringHelper::strrpos($tmp, ' ')));
+                    $tmp = (string) S::create($tmp)->substr(0, S::create($tmp)->indexOfLast(' ') + 1);
                 }
             }
 
@@ -301,14 +301,14 @@ class HtmlText extends Text
     public static function abridge($text, $length = 50, $intro = 30)
     {
         // Abridge the item text if it is too long.
-        if (StringHelper::strlen($text) > $length)
+        if (S::create($text)->length() > $length)
         {
             // Determine the remaining text length.
             $remainder = $length - ($intro + 3);
 
             // Extract the beginning and ending text sections.
-            $beg = StringHelper::substr($text, 0, $intro);
-            $end = StringHelper::substr($text, utf8_strlen($text) - $remainder);
+            $beg = (string) S::create($text)->substr(0, $intro);
+            $end = (string) S::create($text)->substr(utf8_strlen($text) - $remainder);
 
             // Build the resulting string.
             $text = $beg . '...' . $end;

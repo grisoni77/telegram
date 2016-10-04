@@ -39,7 +39,14 @@ class Client
         $this->token = $token;
         $this->apiUrl = $this->config['apiurl'].'/bot'.$token.'/';
         $this->httpClient->setBaseUrl($this->apiUrl);
+    }
 
+    /**
+     * @return string
+     */
+    public function getToken()
+    {
+        return $this->token;
     }
 
     public function __construct($config, \Guzzle\Http\Client $httpClient, Serializer $serializer, LoggerInterface $logger = null)
