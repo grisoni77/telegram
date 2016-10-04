@@ -10,6 +10,7 @@ namespace tests\Gr77\Controller;
 
 
 use Gr77\Controller\Handler\Text;
+use Gr77\Controller\Handler\Location;
 use Gr77\Controller\Chain;
 use Gr77\Telegram\Client;
 use Gr77\Telegram\Update;
@@ -51,5 +52,34 @@ class ChainTest extends TestCase
         $chain->handle($update);
     }
 
+    public function testHandleLocation()
+    {
+        $config = [
+            "session_type" => "null"
+        ];
+        $httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
+        $serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
+        $client = $this->getMockBuilder(Client::class)
+            ->setConstructorArgs(array($config,$httpClient, $serializer))
+            ->getMock();
+        $chain = new Chain("chainName", $client, $config);
+
+        $locationHandler = $this->getMockBuilder(Location::class)
+            ->setConstructorArgs(array())
+            ->getMock();
+        $locationHandler->registerLocationHandler("\\MyHandler3");
+
+        $chain->addHandler($locationHandler);
+
+        $res = '{"update_id":655079745, "message":{"message_id":851,"from":{"id":121262313,"first_name":"Cristiano","last_name":"Cucco","username":"Grisoni77"},"chat":{"id":121262313,"first_name":"Cristiano","last_name":"Cucco","username":"Grisoni77","type":"private"},"date":1462896686,"location":{"latitude":44.912887,"longitude":8.035178}}}';
+        $update = Update::mapFromArray(json_decode($res, true));
+
+        $locationHandler->expects($this->once())
+            ->method("handleUpdate")
+            ->with($update)
+        ;
+
+        $chain->handle($update);
+    }
 
 }

@@ -18,6 +18,7 @@
     "require": {
         "guzzle/guzzle": "v3.8.1",
         "danielstjules/stringy": "~2.3",
+        "tgallice/wit-php": "*",
         "psr/log": "1.0.*"
     },
     "require-dev": {

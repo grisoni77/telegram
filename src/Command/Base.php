@@ -54,8 +54,7 @@ abstract class Base implements Handler
      */
     public static function provide(Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        $handler = new static($client, $session, $config, $logger);
-        return $handler;
+        return new static($client, $session, $config, $logger);
     }
 
     /**
