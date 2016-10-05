@@ -11,7 +11,7 @@
 namespace Gr77\Telegram\Response;
 
 
-use Guzzle\Http\Exception\BadResponseException;
+use GuzzleHttp\Exception\BadResponseException;
 
 abstract class Response
 {

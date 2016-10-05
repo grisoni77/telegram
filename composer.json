@@ -16,7 +16,7 @@
         "psr-4": { "tests\\": "tests/" }
     },
     "require": {
-        "guzzle/guzzle": "v3.8.1",
+        "guzzlehttp/guzzle": "~6.2",
         "danielstjules/stringy": "~2.3",
         "tgallice/wit-php": "*",
         "psr/log": "1.0.*"

@@ -12,19 +12,21 @@ use Gr77\Telegram\Response\Forbidden;
 use Gr77\Telegram\Response\Message;
 use Gr77\Telegram\Response\Response;
 use Gr77\Telegram\Response\Updates;
-use Guzzle\Http\Exception\BadResponseException;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\TransferException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class Client
 {
-    /** @var \Guzzle\Http\Client  */
+    /** @var \GuzzleHttp\Client  */
     protected $httpClient;
     /** @var  array */
     protected $config;
     /** @var  string */
     protected $token;
-    /** @var  string */
+    /** @var  string Telegram bot endpoint */
     protected $apiUrl;
     /** @var Serializer  */
     protected $serializer;
@@ -38,7 +40,9 @@ class Client
     {
         $this->token = $token;
         $this->apiUrl = $this->config['apiurl'].'/bot'.$token.'/';
-        $this->httpClient->setBaseUrl($this->apiUrl);
+        $this->httpClient = new \GuzzleHttp\Client([
+            'base_uri' => $this->apiUrl,
+        ]);
     }
 
     /**
@@ -49,10 +53,18 @@ class Client
         return $this->token;
     }
 
-    public function __construct($config, \Guzzle\Http\Client $httpClient, Serializer $serializer, LoggerInterface $logger = null)
+    /**
+     * Client constructor.
+     * @param $config
+     * @param Serializer $serializer
+     * @param LoggerInterface|null $logger
+     */
+    public function __construct($config, Serializer $serializer, LoggerInterface $logger = null)
     {
         $this->config = $config;
-        $this->httpClient = $httpClient;
+        if (isset($config['token'])) {
+            $this->setToken($config['token']);
+        }
         $this->serializer = $serializer;
         if (isset($logger)) {
             $this->logger = $logger;
@@ -62,7 +74,7 @@ class Client
     }
 
     /**
-     * @return \Guzzle\Http\Client
+     * @return \GuzzleHttp\Client
      */
     public function getHttpClient()
     {
@@ -94,7 +106,6 @@ class Client
     {
         $encodedBody = $this->serializer->toJson($body);
         $this->logger->debug($encodedBody);
-        echo $encodedBody;
         return $encodedBody;
     }
 
@@ -102,19 +113,21 @@ class Client
      * @param $token
      * @return array|bool|float|int|string
      */
-    public function setWebhook($token)
+    public function setWebhook($webhookUrl, $token = null)
     {
         try {
-            $this->setToken($token);
-            $res = $this->httpClient
-                ->post('setWebhook', null, array(
-                    'url' => $this->config['botBaseUrl'] . '/webhook/' . $token
-                ))
-                ->send()
-                ->json()
+            if (isset($token)) {
+                $this->setToken($token);
+            }
+            $res = json_decode((string) $this->httpClient
+                ->post('setWebhook', [
+                    'json' => [
+                        'url' => $webhookUrl
+                    ]
+                ]))
             ;
             return $res['description'];
-        } catch (BadResponseException $e) {
+        } catch (TransferException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
         }

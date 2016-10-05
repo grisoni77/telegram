@@ -13,10 +13,9 @@ use Gr77\Controller\Handler;
 use Gr77\Session\Session;
 use Gr77\Telegram\Client;
 use Gr77\Telegram\Update;
-use Guzzle\Common\Exception\BadMethodCallException;
 use Psr\Log\LoggerInterface;
 
-class WitAi extends Handler
+class Intent extends Handler
 {
     /** @var  \ArrayObject */
     private $intentHandlers;
@@ -28,9 +27,9 @@ class WitAi extends Handler
         $this->intentHandlers = new \ArrayObject();
 
         if (!isset($config['wit_ai_secret'])) {
-            throw new BadMethodCallException("Wit.ai secret key is mandatory", 400);
+            throw new \BadMethodCallException("Wit.ai secret key missing in config", 400);
         }
-        $this->wit_ai_secret = $config['wit_ai_secret']);
+        $this->wit_ai_secret = $config['wit_ai_secret'];
 
         if (isset($config["intentHandlers"]) && is_array($config["intentHandlers"]) && count($config["intentHandlers"])>0) {
             foreach ($config["intentHandlers"] as $intent => $intentHandlers) {
