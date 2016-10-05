@@ -220,7 +220,10 @@ class Client
             if (isset($parse_mode)) {
                 $body["parse_mode"] = $parse_mode;
             } elseif (isset($text)) {
-                $body["parse_mode"] = $text->getParseMode();
+                $parse_mode = $text->getParseMode();
+                if (!empty($parse_mode)) {
+                    $body["parse_mode"] = $parse_mode;
+                }
             }
             if (isset($disable_web_page_preview)) {
                 $body["disable_web_page_preview"] = $disable_web_page_preview;

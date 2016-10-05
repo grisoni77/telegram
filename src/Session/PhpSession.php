@@ -47,7 +47,7 @@ class PhpSession implements Session
      */
     public function getSessionId()
     {
-        return $this->getSessionId();
+        return $this->session_id;
     }
 
     /**

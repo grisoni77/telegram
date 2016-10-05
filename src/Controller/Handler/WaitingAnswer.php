@@ -20,11 +20,6 @@ use Psr\Log\LoggerInterface;
 
 class WaitingAnswer extends Handler
 {
-
-    public function __construct()
-    {
-    }
-
     /**
      * Check for handler waiting for answer
      * @return bool

@@ -26,10 +26,10 @@ class Intent extends Handler
     {
         $this->intentHandlers = new \ArrayObject();
 
-        if (!isset($config['wit_ai_secret'])) {
+        if (!isset($config['config_bot']['wit_ai_secret'])) {
             throw new \BadMethodCallException("Wit.ai secret key missing in config", 400);
         }
-        $this->wit_ai_secret = $config['wit_ai_secret'];
+        $this->wit_ai_secret = $config['config_bot']['wit_ai_secret'];
 
         if (isset($config["intentHandlers"]) && is_array($config["intentHandlers"]) && count($config["intentHandlers"])>0) {
             foreach ($config["intentHandlers"] as $intent => $intentHandlers) {
@@ -73,13 +73,14 @@ class Intent extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
+        $handled = false;
         $text = $update->getMessage()->hasText() ? $update->getMessage()->text : false;
         if (false !== $text) {
             // handle user intent wit.ai api
             $witaiClient = new \Tgallice\Wit\Client($this->wit_ai_secret);
             $response = $witaiClient->get("/message", array(
                 "q" => $text,
-                "thread_id" => $this->session->getSessionId(),
+                "thread_id" => $session->getSessionId(),
             ));
             $message = json_decode((string) $response->getBody(), true);
             if (isset($message["entities"]["Intent"])) {
@@ -92,10 +93,11 @@ class Intent extends Handler
                     }
                 }
                 if (isset($intentType) && null !== $handlers = $this->getIntentHandlers($intentType)) {
+                    $handled = true;
                     //var_dump($handlers);
                     foreach ($handlers as $handlerClassname) {
                         /** @var \Gr77\Command\TextHandler $handler */
-                        $handler = $handlerClassname::provide($client, $session, $config_bot, $logger);
+                        $handler = $handlerClassname::provide($client, $session, $config, $logger);
                         $intent = new WitAiIntent($intentType, $message);
                         if (false === $handler->handleIntent($update, $intent)) {
                             break;
@@ -103,7 +105,8 @@ class Intent extends Handler
                     }
                 }
             }
-        } else {
+        }
+        if (!$handled) {
             parent::handleUpdate($update, $client, $session, $config, $logger);
         }
     }

@@ -79,7 +79,9 @@ class Chain
         $this->initChatSession($update);
 
         // send update to the chain
-        $this->handlers[0]->handleUpdate($update, $this->client, $this->session, $this->config, $this->logger);
+        if (count($this->handlers)>0) {
+            $this->handlers[0]->handleUpdate($update, $this->client, $this->session, $this->config, $this->logger);
+        }
     }
 
 
