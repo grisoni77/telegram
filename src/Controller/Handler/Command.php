@@ -9,6 +9,7 @@
 namespace Gr77\Controller\Handler;
 
 
+use Gr77\Command\CommandHandler;
 use Gr77\Controller\Handler;
 use Gr77\Session\Session;
 use Gr77\Telegram\Client;
@@ -75,6 +76,25 @@ class Command extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        // TODO: Implement handleUpdate() method.
+        $handled = false;
+        if ($update->getMessage()->isCommand()) {
+            $command = $update->getMessage()->getCommand();
+            $text = $command->getValue();
+            if ($this->hasCommandHandlers($text)) {
+                $handled = true;
+                $handlers = $this->getCommandHandlers($text);
+                //var_dump($handlers);
+                foreach ($handlers as $handlerClassname) {
+                    /** @var CommandHandler $handler */
+                    $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                    if (false === $handler->handleCommand($update)) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (!$handled) {
+            parent::handleUpdate($update, $client, $session, $config, $logger);
+        }
     }
 }

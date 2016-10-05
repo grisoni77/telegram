@@ -28,7 +28,12 @@ abstract class Handler
      * @param LoggerInterface $logger
      * @return void
      */
-    abstract public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null);
+    public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
+    {
+        if (isset($this->successor)) {
+            $this->successor->handleUpdate($update, $client, $session, $config, $logger);
+        }
+    }
 
     /**
      * @return Handler

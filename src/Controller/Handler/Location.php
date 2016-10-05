@@ -57,12 +57,19 @@ class Location extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        foreach ($this->locationHandlers as $handlerClassname) {
-            /** @var \Gr77\Command\LocationHandler $handler */
-            $handler = $handlerClassname::provide($client, $session, $config, $logger);
-            if (false === $handler->handleLocation($update)) {
-                break;
+        $handled = false;
+        if ($update->getMessage()->hasLocation() && count($this->locationHandlers)>0) {
+            $handled = true;
+            foreach ($this->locationHandlers as $handlerClassname) {
+                /** @var \Gr77\Command\LocationHandler $handler */
+                $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                if (false === $handler->handleLocation($update)) {
+                    break;
+                }
             }
+        }
+        if (!$handled) {
+            parent::handleUpdate($update, $client, $session, $config, $logger);
         }
     }
 }

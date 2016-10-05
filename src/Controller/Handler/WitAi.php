@@ -74,34 +74,38 @@ class WitAi extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        $text = $update->getMessage()->text;
-        // handle user intent wit.ai api
-        $witaiClient = new \Tgallice\Wit\Client($this->wit_ai_secret);
-        $response = $witaiClient->get("/message", array(
-            "q" => $text,
-            "thread_id" => $this->session->getSessionId(),
-        ));
-        $message = json_decode((string) $response->getBody(), true);
-        if (isset($message["entities"]["Intent"])) {
-            $confidence = 0;
-            $intentType = null;
-            foreach ($message["entities"]["Intent"] as $item) {
-                if ($item["confidence"] > $confidence) {
-                    $intentType = $item["value"];
-                    $confidence = $item["confidence"];
+        $text = $update->getMessage()->hasText() ? $update->getMessage()->text : false;
+        if (false !== $text) {
+            // handle user intent wit.ai api
+            $witaiClient = new \Tgallice\Wit\Client($this->wit_ai_secret);
+            $response = $witaiClient->get("/message", array(
+                "q" => $text,
+                "thread_id" => $this->session->getSessionId(),
+            ));
+            $message = json_decode((string) $response->getBody(), true);
+            if (isset($message["entities"]["Intent"])) {
+                $confidence = 0;
+                $intentType = null;
+                foreach ($message["entities"]["Intent"] as $item) {
+                    if ($item["confidence"] > $confidence) {
+                        $intentType = $item["value"];
+                        $confidence = $item["confidence"];
+                    }
                 }
-            }
-            if (isset($intentType) && null !== $handlers = $this->getIntentHandlers($intentType)) {
-                //var_dump($handlers);
-                foreach ($handlers as $handlerClassname) {
-                    /** @var \Gr77\Command\TextHandler $handler */
-                    $handler = $handlerClassname::provide($client, $session, $config_bot, $logger);
-                    $intent = new WitAiIntent($intentType, $message);
-                    if (false === $handler->handleIntent($update, $intent)) {
-                        break;
+                if (isset($intentType) && null !== $handlers = $this->getIntentHandlers($intentType)) {
+                    //var_dump($handlers);
+                    foreach ($handlers as $handlerClassname) {
+                        /** @var \Gr77\Command\TextHandler $handler */
+                        $handler = $handlerClassname::provide($client, $session, $config_bot, $logger);
+                        $intent = new WitAiIntent($intentType, $message);
+                        if (false === $handler->handleIntent($update, $intent)) {
+                            break;
+                        }
                     }
                 }
             }
+        } else {
+            parent::handleUpdate($update, $client, $session, $config, $logger);
         }
     }
 }

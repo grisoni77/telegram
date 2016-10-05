@@ -98,8 +98,8 @@ class Text extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        $text = $update->getMessage()->text;
-        if (false !== $handlers = $this->getTextHandlers($text)) {
+        $text = $update->getMessage()->hasText() ? $update->getMessage()->text : false;
+        if (false !== $text && false !== $handlers = $this->getTextHandlers($text)) {
             //var_dump($handlers);
             foreach ($handlers as $handlerClassname) {
                 /** @var \Gr77\Command\TextHandler $handler */
@@ -109,7 +109,7 @@ class Text extends Handler
                 }
             }
         } else {
-            $this->successor->handleUpdate($update, $client, $session, $config, $logger);
+            parent::handleUpdate($update, $client, $session, $config, $logger);
         }
     }
 }
