@@ -12,6 +12,7 @@ namespace Gr77\Telegram\Response;
 
 
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Psr7\Stream;
 
 abstract class Response
 {
@@ -21,13 +22,17 @@ abstract class Response
     protected $description;
     /** @var  int */
     protected $error_code;
+    /** @var  mixed */
+    protected $result;
 
     /**
      * Response constructor.
-     * @param $data array
+     * @param $data Stream
      */
-    public function __construct($data)
+    public function __construct(Stream $stream)
     {
+        $data = json_decode((string) $stream, true);
+
         $this->ok = $data['ok'];
         if (isset($data['description'])) {
             $this->description = $data['description'];
@@ -41,7 +46,8 @@ abstract class Response
     }
 
     /**
-     * @param $result result field in telegram response
+     * Template method to be implemented in concrete classes
+     * @param mixed $result result field in telegram response
      */
     abstract protected function parseResult($result);
 
@@ -85,22 +91,29 @@ abstract class Response
         return $this->error_code;
     }
 
+    /**
+     * @TODO Needs to change the way I manage this...
+     *
+     * @param BadResponseException $e
+     * @return Error|Forbidden
+     */
     public static function handleException(BadResponseException $e)
     {
+        $e->getResponse()->getBody();
         $code = $e->getResponse()->getStatusCode();
         if ($code == 403) {
-            return new Forbidden(array(
+            return new Forbidden(\GuzzleHttp\Psr7\stream_for(json_encode([
                 "ok" => false,
                 "error_code" => 403,
                 "result" => $e->getMessage(),
-            ));
+            ])));
         }
         else {
-            return new Error(array(
+            return new Error(\GuzzleHttp\Psr7\stream_for(json_encode([
                 "ok" => false,
                 "error_code" => $e->getCode(),
                 "description" => $e->getCode()." ".$e->getMessage(),
-            ));
+            ])));
         }
     }
 }

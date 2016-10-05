@@ -137,19 +137,21 @@ class Client
      * @param $token
      * @return array|bool|float|int|string
      */
-    public function removeWebhook($token)
+    public function removeWebhook($token = null)
     {
         try {
-            $this->setToken($token);
-            $res = $this->httpClient
-                ->post('setWebhook', null, array(
-                    'url' => ''
-                ))
-                ->send()
-                ->json()
+            if (isset($token)) {
+                $this->setToken($token);
+            }
+            $res = json_decode((string) $this->httpClient
+                ->post('setWebhook', [
+                    'json' => [
+                        'url' => ''
+                    ]
+                ]))
             ;
             return $res['description'];
-        } catch (BadResponseException $e) {
+        } catch (TransferException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
         }
@@ -162,18 +164,16 @@ class Client
     public function getUpdates($params = array())
     {
         try {
-            $res = $this->httpClient
-                ->post('getUpdates', null, $params)
-                ->send()
-                ->json()
-            ;
+            $res = json_decode((string) $this->httpClient
+                ->post('getUpdates', $params)
+            );
             if ($res['ok']) {
                 return new Updates($res);
             } else {
                 return new Error($res);
             }
             //return print_r($response->getResult(), true);
-        } catch (BadResponseException $e) {
+        } catch (TransferException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
         }
@@ -186,7 +186,7 @@ class Client
      *
      * @param int|string $chat_id Unique identifier for the target chat or username of the target channel (in the format @channelusername)
      * @param string $action Type of action to broadcast. See constants defined in Gr77\Telegram\Chat\Action class
-     * @return Message
+     * @return \Gr77\Telegram\Response\Boolean
      * @see https://core.telegram.org/bots/api#sendchataction
      */
     public function sendChatAction($chat_id, $action)
@@ -196,11 +196,11 @@ class Client
                 "chat_id" => $chat_id,
                 "action" => $action,
             );
-            $request = $this->httpClient->post('sendChatAction');
-            $request->setHeader('Content-Type', 'application/json');
-            $request->setBody($this->toJson($body));
-            $res = $request->send()->json();
-            return new Boolean($res);
+            $res = $this->httpClient
+                ->post('sendChatAction', [
+                    'json' => $body
+                ]);
+            return new Boolean($res->getBody());
         } catch (BadResponseException $e) {
             //echo $e->getMessage();
 //            print_r($e->getResponse());
@@ -217,7 +217,7 @@ class Client
      * @param bool|false $disable_notification Sends the message silently.
      * @param null $reply_to_message_id If the message is a reply, ID of the original message
      * @param ReplyMarkup|null $reply_markup
-     * @return Message
+     * @return Response
      * @see https://core.telegram.org/bots/api#sendmessage
      */
     public function sendMessage(
@@ -255,11 +255,11 @@ class Client
             if (isset($reply_markup)) {
                 $body["reply_markup"] = $reply_markup->toArray();
             }
-            $request = $this->httpClient->post('sendMessage');
-            $request->setHeader('Content-Type', 'application/json');
-            $request->setBody($this->toJson($body));
-            $res = $request->send()->json();
-            return new Message($res);
+            $res = $this->httpClient
+                ->post('sendMessage', [
+                    'json' => $body
+                ]);
+            return new Message($res->getBody());
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
@@ -274,7 +274,7 @@ class Client
      * @param $chat_id
      * @param Text $text
      * @param ReplyMarkup $keyboard
-     * @return Message
+     * @return Response
      */
     public function sendKeyboard($chat_id, Text $text, ReplyMarkup $keyboard)
     {
@@ -292,7 +292,7 @@ class Client
      * @param $disable_notification
      * @param $reply_to_message_id
      * @param $reply_markup
-     * @return Message
+     * @return Response
      * @see https://core.telegram.org/bots/api#sendvenue
      */
     public function sendVenue(
@@ -303,7 +303,7 @@ class Client
         $foursquare_id = null,
         $disable_notification = null,
         $reply_to_message_id = null,
-        $reply_markup = null
+        ReplyMarkup $reply_markup = null
     )
     {
         try {
@@ -326,11 +326,11 @@ class Client
             if (isset($reply_markup)) {
                 $body["reply_markup"] = $reply_markup->toArray();
             }
-            $request = $this->httpClient->post('sendVenue');
-            $request->setHeader('Content-Type', 'application/json');
-            $request->setBody($this->toJson($body));
-            $res = $request->send()->json();
-            return new Message($res);
+            $res = $this->httpClient
+                ->post('sendVenue', [
+                    'json' => $body
+                ]);
+            return new Message($res->getBody());
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
@@ -348,7 +348,7 @@ class Client
      * @param $disable_notification Optional. Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
      * @param $reply_to_message_id Optional. If the message is a reply, ID of the original message
      * @param $reply_markup Optional. Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to hide reply keyboard or to force a reply from the user.
-     * @return Message
+     * @return Response
      * @see https://core.telegram.org/bots/api#sendphoto
      */
     public function sendPhoto(
@@ -376,34 +376,34 @@ class Client
             if (isset($reply_markup)) {
                 $body["reply_markup"] = $reply_markup->toArray();
             }
+            // upload file as multipart/form-data
             if ($photo instanceof InputFile) {
-//                $request = $this->httpClient->post('sendPhoto');
-//                $request
-//                    ->addPostFiles(array("photo" => $photo->getData()))
-//                    ->addPostFields(json_decode(json_encode($body), true));
-                $bot_url    = $this->httpClient->getBaseUrl();
-                $ch = curl_init($bot_url.'sendPhoto');
-//                $cfile = new \CURLFile($photo->getFileName());
-                $data = array(
-                    'chat_id' => $chat_id,
-//                    'photo' => $cfile ,
-                    'photo' => '@' . realpath($photo->getData()) . ';filename='.$photo->getData(),
-                    'caption' => 'testing'
-                );
-                curl_setopt($ch, CURLOPT_POST,1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $res = curl_exec($ch);
-                $res = json_decode($res, true);
-            } else {
-                $request = $this->httpClient->post('sendPhoto');
-                $body["photo"] = $photo;
-                $request->setHeader('Content-Type', 'application/json');
-                $request->setBody($this->toJson($body));
-                $res = $request->send()->json();
+                $multipart = [];
+                foreach ($body as $name => $content) {
+                    $multipart[] = [
+                        'name' => $name,
+                        'content' => $content,
+                    ];
+                }
+                $multipart[] = [
+                    'name' => 'photo',
+                    'content' => $photo->getResource(),
+                ];
+                $res = $this->httpClient
+                    ->post('sendPhoto', [
+                        'multipart' => $multipart
+                    ]);
             }
-            return new Message($res);
+            // send json as usual
+            else
+            {
+                $body["photo"] = $photo;
+                $res = $this->httpClient
+                    ->post('sendPhoto', [
+                        'json' => $body
+                    ]);
+            }
+            return new Message($res->getBody());
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
@@ -420,7 +420,7 @@ class Client
      * @param $disable_notification Optional. Sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
      * @param $reply_to_message_id Optional. If the message is a reply, ID of the original message
      * @param $reply_markup Optional. Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to hide reply keyboard or to force a reply from the user.
-     * @return Message
+     * @return Response
      * @see https://core.telegram.org/bots/api#sendsticker
      */
     public function sendSticker(
@@ -445,33 +445,32 @@ class Client
                 $body["reply_markup"] = $reply_markup->toArray();
             }
             if ($sticker instanceof InputFile) {
-//                $request = $this->httpClient->post('sendPhoto');
-//                $request
-//                    ->addPostFiles(array("photo" => $photo->getData()))
-//                    ->addPostFields(json_decode(json_encode($body), true));
-                $bot_url    = $this->httpClient->getBaseUrl();
-                $ch = curl_init($bot_url.'sendSticker');
-//                $cfile = new \CURLFile($photo->getFileName());
-                $data = array(
-                    'chat_id' => $chat_id,
-//                    'photo' => $cfile ,
-                    'sticker' => '@' . realpath($sticker->getData()) . ';filename='.$sticker->getData(),
-                    'caption' => 'testing'
-                );
-                curl_setopt($ch, CURLOPT_POST,1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $res = curl_exec($ch);
-                $res = json_decode($res, true);
-            } else {
-                $request = $this->httpClient->post('sendSticker');
-                $body["sticker"] = $sticker;
-                $request->setHeader('Content-Type', 'application/json');
-                $request->setBody($this->toJson($body));
-                $res = $request->send()->json();
+                $multipart = [];
+                foreach ($body as $name => $content) {
+                    $multipart[] = [
+                        'name' => $name,
+                        'content' => $content,
+                    ];
+                }
+                $multipart[] = [
+                    'name' => 'sticker',
+                    'content' => $sticker->getResource(),
+                ];
+                $res = $this->httpClient
+                    ->post('sendSticker', [
+                        'multipart' => $multipart
+                    ]);
             }
-            return new Message($res);
+            // send json as usual
+            else
+            {
+                $body["sticker"] = $sticker;
+                $res = $this->httpClient
+                    ->post('sendSticker', [
+                        'json' => $body
+                    ]);
+            }
+            return new Message($res->getBody());
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());

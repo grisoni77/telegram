@@ -12,6 +12,8 @@
 namespace Gr77\Telegram\Response;
 
 
+use GuzzleHttp\Psr7\Stream;
+
 class Forbidden extends Response
 {
     /**
@@ -19,9 +21,10 @@ class Forbidden extends Response
      */
     private $response;
 
-    public function __construct(array $data)
+    public function __construct(Stream $stream)
     {
-        parent::__construct($data);
+        parent::__construct($stream);
+
         if (!isset($this->description) && empty($this->description)) {
             $this->description = "Forbidden..user probably stopped this bot";
         }
