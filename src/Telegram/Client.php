@@ -8,12 +8,10 @@ use Gr77\Telegram\ReplyMarkup\ReplyMarkup;
 use Gr77\Telegram\Request\Serializer;
 use Gr77\Telegram\Response\Boolean;
 use Gr77\Telegram\Response\Error;
-use Gr77\Telegram\Response\Forbidden;
 use Gr77\Telegram\Response\Message;
 use Gr77\Telegram\Response\Response;
 use Gr77\Telegram\Response\Updates;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -26,10 +24,6 @@ class Client
     protected $config;
     /** @var  string */
     protected $token;
-    /** @var  string Telegram bot endpoint */
-    protected $apiUrl;
-    /** @var Serializer  */
-    protected $serializer;
     /** @var \Psr\Log\LoggerInterface  */
     protected $logger;
 
@@ -39,9 +33,8 @@ class Client
     public function setToken($token)
     {
         $this->token = $token;
-        $this->apiUrl = $this->config['apiurl'].'/bot'.$token.'/';
         $this->httpClient = new \GuzzleHttp\Client([
-            'base_uri' => $this->apiUrl,
+            'base_uri' => $this->config['apiurl'].'/bot'.$token.'/',
         ]);
     }
 
@@ -56,16 +49,14 @@ class Client
     /**
      * Client constructor.
      * @param $config
-     * @param Serializer $serializer
      * @param LoggerInterface|null $logger
      */
-    public function __construct($config, Serializer $serializer, LoggerInterface $logger = null)
+    public function __construct($config, LoggerInterface $logger = null)
     {
         $this->config = $config;
         if (isset($config['token'])) {
             $this->setToken($config['token']);
         }
-        $this->serializer = $serializer;
         if (isset($logger)) {
             $this->logger = $logger;
         } else {
@@ -95,18 +86,6 @@ class Client
     public function getConfig()
     {
         return $this->config;
-    }
-
-
-    /**
-     * @param $body
-     * @return string
-     */
-    private function toJson($body)
-    {
-        $encodedBody = $this->serializer->toJson($body);
-        $this->logger->debug($encodedBody);
-        return $encodedBody;
     }
 
     /**
@@ -486,7 +465,7 @@ class Client
      * @param $callback_query_id Unique identifier for the query to be answered
      * @param string|null $text Text of the notification. If not specified, nothing will be shown to the user
      * @param null $show_alert If true, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
-     * @return Message
+     * @return Response
      * @see https://core.telegram.org/bots/api#answercallbackquery
      */
     public function answerCallbackQuery(
@@ -505,15 +484,11 @@ class Client
             if (isset($show_alert)) {
                 $body["show_alert"] = $show_alert;
             }
-            $request = $this->httpClient->post('answerCallbackQuery');
-            $request->setHeader('Content-Type', 'application/json');
-            $request->setBody($this->toJson($body));
-            $res = $request->send()->json();
-            if ($res['ok']) {
-                return new Boolean($res);
-            } else {
-                return new Error($res);
-            }
+            $res = $this->httpClient
+                ->post('answerCallbackQuery', [
+                    'json' => $body
+                ]);
+            return new Boolean($res->getBody());
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
@@ -570,11 +545,11 @@ class Client
             if (isset($reply_markup)) {
                 $body["reply_markup"] = $reply_markup->toArray();
             }
-            $request = $this->httpClient->post('editMessageText');
-            $request->setHeader('Content-Type', 'application/json');
-            $request->setBody($this->toJson($body));
-            $res = $request->send()->json();
-            return new Message($res);
+            $res = $this->httpClient
+                ->post('editMessageText', [
+                    'json' => $body
+                ]);
+            return new Message($res->getBody());
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());
@@ -587,7 +562,7 @@ class Client
 
     /**
      * @param string $inline_query_id Unique identifier for the answered query
-     * @param \Gr77\Telegram\InlineQuery\InlineQueryResult[] $results
+     * @param \Gr77\Telegram\InlineQuery\InlineQueryResult\InlineQueryResult[] $results
      * @param int $cache_time
      * @param bool $is_personal
      * @param string $next_offset
@@ -625,15 +600,11 @@ class Client
             if (isset($switch_pm_parameter)) {
                 $body["switch_pm_parameter"] = $switch_pm_parameter;
             }
-            $request = $this->httpClient->post('answerInlineQuery');
-            $request->setHeader('Content-Type', 'application/json');
-            $request->setBody($this->toJson($body));
-            $res = $request->send()->json();
-            if ($res['ok']) {
-                return new Boolean($res);
-            } else {
-                return new Error($res);
-            }
+            $res = $this->httpClient
+                ->post('answerInlineQuery', [
+                    'json' => $body
+                ]);
+            return new Boolean($res->getBody());
         } catch (BadResponseException $e) {
             echo $e->getMessage();
 //            print_r($e->getResponse());

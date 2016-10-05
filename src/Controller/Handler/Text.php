@@ -95,6 +95,10 @@ class Text extends Handler
     /**
      * Handle update and passes it to next in chain
      * @param Update $update
+     * @param Client $client
+     * @param Session $session
+     * @param array $config
+     * @param LoggerInterface|null $logger
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
