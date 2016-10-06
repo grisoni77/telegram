@@ -23,10 +23,10 @@ class ChainTest extends TestCase
         $config = [
             "session_type" => "null"
         ];
-        $httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
-        $serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
+        //$httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
+        //$serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
         $client = $this->getMockBuilder(Client::class)
-            ->setConstructorArgs(array($config,$httpClient, $serializer))
+            ->setConstructorArgs(array($config))
             ->getMock();
         $chain = new Chain("chainName", $client, $config);
 //        $chain = $this->getMockBuilder(Chain::class)
@@ -57,10 +57,10 @@ class ChainTest extends TestCase
         $config = [
             "session_type" => "null"
         ];
-        $httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
-        $serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
+        //$httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
+        //$serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
         $client = $this->getMockBuilder(Client::class)
-            ->setConstructorArgs(array($config,$httpClient, $serializer))
+            ->setConstructorArgs(array($config))
             ->getMock();
         $chain = new Chain("chainName", $client, $config);
 

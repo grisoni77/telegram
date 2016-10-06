@@ -27,24 +27,6 @@ class Client
     /** @var \Psr\Log\LoggerInterface  */
     protected $logger;
 
-    /**
-     * @param string $token
-     */
-    public function setToken($token)
-    {
-        $this->token = $token;
-        $this->httpClient = new \GuzzleHttp\Client([
-            'base_uri' => $this->config['apiurl'].'/bot'.$token.'/',
-        ]);
-    }
-
-    /**
-     * @return string
-     */
-    public function getToken()
-    {
-        return $this->token;
-    }
 
     /**
      * Client constructor.
@@ -65,12 +47,33 @@ class Client
     }
 
     /**
-     * @return \GuzzleHttp\Client
+     * @return array
      */
-    public function getHttpClient()
+    public function getConfig()
     {
-        return $this->httpClient;
+        return $this->config;
     }
+
+
+    /**
+     * @param string $token
+     */
+    public function setToken($token)
+    {
+        $this->token = $token;
+        $this->httpClient = new \GuzzleHttp\Client([
+            'base_uri' => $this->config['apiurl'].'/bot'.$token.'/',
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getToken()
+    {
+        return $this->token;
+    }
+
 
     /**
      * @return NullLogger
@@ -81,11 +84,13 @@ class Client
     }
 
     /**
-     * @return array
+     * @param LoggerInterface $logger
+     * @return Client
      */
-    public function getConfig()
+    public function setLogger($logger)
     {
-        return $this->config;
+        $this->logger = $logger;
+        return $this;
     }
 
     /**
