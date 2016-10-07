@@ -5,55 +5,56 @@ use Gr77\Telegram\Message\Content\InputFile;
 use Gr77\Telegram\Message\Content\Location;
 use Gr77\Telegram\Message\Content\Text;
 use Gr77\Telegram\ReplyMarkup\ReplyMarkup;
-use Gr77\Telegram\Request\Serializer;
 use Gr77\Telegram\Response\Boolean;
 use Gr77\Telegram\Response\Error;
 use Gr77\Telegram\Response\Message;
 use Gr77\Telegram\Response\Response;
 use Gr77\Telegram\Response\Updates;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\TransferException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class Client
 {
-    /** @var \GuzzleHttp\Client  */
-    protected $httpClient;
     /** @var  array */
     protected $config;
     /** @var  string */
     protected $token;
+    /** @var \GuzzleHttp\Client  */
+    private $httpClient;
     /** @var \Psr\Log\LoggerInterface  */
     protected $logger;
 
-
     /**
      * Client constructor.
-     * @param $config
+     * @param array $config
      * @param LoggerInterface|null $logger
      */
-    public function __construct($config, LoggerInterface $logger = null)
+    public function __construct($config = array())
     {
+        // validation
+        if (!isset($config['token'])) {
+            throw new \BadMethodCallException('Telegram bot token is missing', 400);
+        }
+
         $this->config = $config;
+        // set token
         if (isset($config['token'])) {
             $this->setToken($config['token']);
         }
-        if (isset($logger)) {
-            $this->logger = $logger;
+        // set http client
+        if (isset($config['http_client'])) {
+            $this->setHttpClient($config['http_client']);
+        } else {
+            $this->httpClient = new \GuzzleHttp\Client();
+        }
+        // set logger
+        if (isset($config['logger'])) {
+            $this->setLogger($config['logger']);
         } else {
             $this->logger = new NullLogger();
         }
     }
-
-    /**
-     * @return array
-     */
-    public function getConfig()
-    {
-        return $this->config;
-    }
-
 
     /**
      * @param string $token
@@ -61,9 +62,7 @@ class Client
     public function setToken($token)
     {
         $this->token = $token;
-        $this->httpClient = new \GuzzleHttp\Client([
-            'base_uri' => $this->config['apiurl'].'/bot'.$token.'/',
-        ]);
+        return $this;
     }
 
     /**
@@ -74,9 +73,26 @@ class Client
         return $this->token;
     }
 
+    /**
+     * @param \GuzzleHttp\Client $httpClient
+     * @return Client
+     */
+    public function setHttpClient(\GuzzleHttp\Client $httpClient)
+    {
+        $this->httpClient = $httpClient;
+        return $this;
+    }
 
     /**
-     * @return NullLogger
+     * @return \GuzzleHttp\Client
+     */
+    public function getHttpClient()
+    {
+        return $this->httpClient;
+    }
+
+    /**
+     * @return LoggerInterface
      */
     public function getLogger()
     {
@@ -87,57 +103,91 @@ class Client
      * @param LoggerInterface $logger
      * @return Client
      */
-    public function setLogger($logger)
+    public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
         return $this;
     }
 
     /**
-     * @param $token
-     * @return array|bool|float|int|string
+     * @param $method
+     * @param $params
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function setWebhook($webhookUrl, $token = null)
+    private function post($method, $params = [])
+    {
+        $endpoint = 'https://api.telegram.org/bot'.$this->getToken().'/'.$method;
+        return $this->httpClient->post($endpoint, $params);
+    }
+
+    /**
+     * @param string $url your bot webhook
+     * @param InputFile $certificate
+     * @return string
+     * @see https://core.telegram.org/bots/api#setwebhook
+     */
+    public function setWebhook($url, InputFile $certificate = null)
     {
         try {
-            if (isset($token)) {
-                $this->setToken($token);
+            if (isset($certificate)) {
+                $res = json_decode(
+                    (string) $this->post('setWebhook', [
+                        'multipart' => [
+                            'url' => $url,
+                            'ceertificate' => $certificate->getResource(),
+                        ]
+                    ]))
+                ;
+            } else {
+                $res = json_decode(
+                    (string) $this->post('setWebhook', [
+                        'json' => [
+                            'url' => $url
+                        ]
+                    ]))
+                ;
             }
-            $res = json_decode((string) $this->httpClient
-                ->post('setWebhook', [
-                    'json' => [
-                        'url' => $webhookUrl
-                    ]
-                ]))
-            ;
             return $res['description'];
-        } catch (TransferException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
+        } catch (BadResponseException $e) {
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
         }
     }
 
     /**
-     * @param $token
-     * @return array|bool|float|int|string
+     * @return string
+     * @see https://core.telegram.org/bots/api#setwebhook
      */
-    public function removeWebhook($token = null)
+    public function removeWebhook()
     {
         try {
-            if (isset($token)) {
-                $this->setToken($token);
-            }
-            $res = json_decode((string) $this->httpClient
-                ->post('setWebhook', [
+            $res = json_decode(
+                (string) $this->post('setWebhook', [
                     'json' => [
                         'url' => ''
                     ]
                 ]))
             ;
             return $res['description'];
-        } catch (TransferException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
+        } catch (BadResponseException $e) {
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
+        }
+    }
+
+
+    /**
+     * @return WebhookInfo
+     * @see https://core.telegram.org/bots/api#webhookinfo
+     */
+    public function getWebhookInfo()
+    {
+        try {
+            $res = json_decode((string) $this->post('getWebhookInfo'));
+            return WebhookInfo::mapFromArray($res);
+        } catch (BadResponseException $e) {
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
         }
     }
 
@@ -148,18 +198,16 @@ class Client
     public function getUpdates($params = array())
     {
         try {
-            $res = json_decode((string) $this->httpClient
-                ->post('getUpdates', $params)
-            );
+            $res = json_decode((string) $this->post('getUpdates', $params));
             if ($res['ok']) {
                 return new Updates($res);
             } else {
                 return new Error($res);
             }
             //return print_r($response->getResult(), true);
-        } catch (TransferException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
+        } catch (BadResponseException $e) {
+            $this->logger->error($e->getRequest()->getBody());
+            $this->logger->error($e->getResponse()->getBody());
         }
     }
 
@@ -180,14 +228,11 @@ class Client
                 "chat_id" => $chat_id,
                 "action" => $action,
             );
-            $res = $this->httpClient
-                ->post('sendChatAction', [
+            $res = $this->post('sendChatAction', [
                     'json' => $body
                 ]);
             return new Boolean($res->getBody());
         } catch (BadResponseException $e) {
-            //echo $e->getMessage();
-//            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
         }
@@ -242,14 +287,11 @@ class Client
             if (isset($reply_markup)) {
                 $body["reply_markup"] = $reply_markup->toArray();
             }
-            $res = $this->httpClient
-                ->post('sendMessage', [
+            $res = $this->post('sendMessage', [
                     'json' => $body
                 ]);
             return new Message($res->getBody());
         } catch (BadResponseException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
             return Response::handleException($e);
@@ -313,14 +355,11 @@ class Client
             if (isset($reply_markup)) {
                 $body["reply_markup"] = $reply_markup->toArray();
             }
-            $res = $this->httpClient
-                ->post('sendVenue', [
+            $res = $this->post('sendVenue', [
                     'json' => $body
                 ]);
             return new Message($res->getBody());
         } catch (BadResponseException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
             return Response::handleException($e);
@@ -376,8 +415,7 @@ class Client
                     'name' => 'photo',
                     'content' => $photo->getResource(),
                 ];
-                $res = $this->httpClient
-                    ->post('sendPhoto', [
+                $res = $this->post('sendPhoto', [
                         'multipart' => $multipart
                     ]);
             }
@@ -385,15 +423,12 @@ class Client
             else
             {
                 $body["photo"] = $photo;
-                $res = $this->httpClient
-                    ->post('sendPhoto', [
+                $res = $this->post('sendPhoto', [
                         'json' => $body
                     ]);
             }
             return new Message($res->getBody());
         } catch (BadResponseException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
             return Response::handleException($e);
@@ -443,8 +478,7 @@ class Client
                     'name' => 'sticker',
                     'content' => $sticker->getResource(),
                 ];
-                $res = $this->httpClient
-                    ->post('sendSticker', [
+                $res = $this->post('sendSticker', [
                         'multipart' => $multipart
                     ]);
             }
@@ -452,15 +486,12 @@ class Client
             else
             {
                 $body["sticker"] = $sticker;
-                $res = $this->httpClient
-                    ->post('sendSticker', [
+                $res = $this->post('sendSticker', [
                         'json' => $body
                     ]);
             }
             return new Message($res->getBody());
         } catch (BadResponseException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
             return Response::handleException($e);
@@ -492,14 +523,11 @@ class Client
             if (isset($show_alert)) {
                 $body["show_alert"] = $show_alert;
             }
-            $res = $this->httpClient
-                ->post('answerCallbackQuery', [
+            $res = $this->post('answerCallbackQuery', [
                     'json' => $body
                 ]);
             return new Boolean($res->getBody());
         } catch (BadResponseException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
             return Response::handleException($e);
@@ -553,14 +581,11 @@ class Client
             if (isset($reply_markup)) {
                 $body["reply_markup"] = $reply_markup->toArray();
             }
-            $res = $this->httpClient
-                ->post('editMessageText', [
+            $res = $this->post('editMessageText', [
                     'json' => $body
                 ]);
             return new Message($res->getBody());
         } catch (BadResponseException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
             return Response::handleException($e);
@@ -608,14 +633,11 @@ class Client
             if (isset($switch_pm_parameter)) {
                 $body["switch_pm_parameter"] = $switch_pm_parameter;
             }
-            $res = $this->httpClient
-                ->post('answerInlineQuery', [
+            $res = $this->post('answerInlineQuery', [
                     'json' => $body
                 ]);
             return new Boolean($res->getBody());
         } catch (BadResponseException $e) {
-            echo $e->getMessage();
-//            print_r($e->getResponse());
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
             return Response::handleException($e);
