@@ -21,12 +21,12 @@ class TextTest extends TestCase
     public function testGetTextHandlers()
     {
         $textHandler = new Text(array());
-        $textHandler->registerRegexpHandler("/Agenda/i", "MyHandler");
-        $textHandler->registerTextHandler("Agenda", "MyHandler2");
+        $textHandler->registerRegexpHandler("/Test/i", "MyHandler");
+        $textHandler->registerTextHandler("test", "MyHandler2");
         $textHandler->registerRegexpHandler("/Search (.*)/i", "MyHandler3");
 
         /** @var \ArrayObject $handlers */
-        $handlers = $this->invokeMethod($textHandler, "getTextHandlers", array("agenda"));
+        $handlers = $this->invokeMethod($textHandler, "getTextHandlers", array("test"));
         $this->assertNotFalse($handlers);
         $this->assertEquals("MyHandler", $handlers->offsetGet(0));
         $this->assertEquals("MyHandler2", $handlers->offsetGet(1));

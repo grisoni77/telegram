@@ -9,6 +9,7 @@
 namespace Gr77\Controller\Handler;
 
 
+use Gr77\Command\Intent\WitAiIntent;
 use Gr77\Controller\Handler;
 use Gr77\Session\Session;
 use Gr77\Telegram\Client;
@@ -59,7 +60,35 @@ class Intent extends Handler
      */
     protected function getIntentHandlers($intent)
     {
-        return $this->intentHandlers->offsetGet($intent);
+        return $this->intentHandlers->offsetExists($intent) ? $this->intentHandlers->offsetGet($intent) : false;
+    }
+
+    /**
+     * try to return intent from text through Wit.ai API
+     * @param $text
+     * @return bool|string false if not an intent
+     */
+    private function getIntentFromText($text)
+    {
+        // handle user intent wit.ai api
+        $witaiClient = new \Tgallice\Wit\Client($this->wit_ai_secret);
+        $response = $witaiClient->get("/message", array(
+            "q" => $text,
+            "thread_id" => $session->getSessionId(),
+        ));
+        $message = json_decode((string) $response->getBody(), true);
+        if (isset($message["entities"]["Intent"])) {
+            $confidence = 0;
+            $intentType = null;
+            foreach ($message["entities"]["Intent"] as $item) {
+                if ($item["confidence"] > $confidence) {
+                    $intentType = $item["value"];
+                    $confidence = $item["confidence"];
+                }
+            }
+            return isset($intentType) ? $intentType : false;
+        }
+        return false;
     }
 
     /**
@@ -74,34 +103,17 @@ class Intent extends Handler
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
         $handled = false;
-        $text = $update->getMessage()->hasText() ? $update->getMessage()->text : false;
+        $text = $update->getMessage()->hasText() ? $update->getMessage()->getText() : false;
         if (false !== $text) {
-            // handle user intent wit.ai api
-            $witaiClient = new \Tgallice\Wit\Client($this->wit_ai_secret);
-            $response = $witaiClient->get("/message", array(
-                "q" => $text,
-                "thread_id" => $session->getSessionId(),
-            ));
-            $message = json_decode((string) $response->getBody(), true);
-            if (isset($message["entities"]["Intent"])) {
-                $confidence = 0;
-                $intentType = null;
-                foreach ($message["entities"]["Intent"] as $item) {
-                    if ($item["confidence"] > $confidence) {
-                        $intentType = $item["value"];
-                        $confidence = $item["confidence"];
-                    }
-                }
-                if (isset($intentType) && null !== $handlers = $this->getIntentHandlers($intentType)) {
-                    $handled = true;
-                    //var_dump($handlers);
-                    foreach ($handlers as $handlerClassname) {
-                        /** @var \Gr77\Command\TextHandler $handler */
-                        $handler = $handlerClassname::provide($client, $session, $config, $logger);
-                        $intent = new WitAiIntent($intentType, $message);
-                        if (false === $handler->handleIntent($update, $intent)) {
-                            break;
-                        }
+            $intentType = $this->getIntentFromText($text);
+            if (false !== $intentType && false !== $handlers = $this->getIntentHandlers($intentType)) {
+                $handled = true;
+                foreach ($handlers as $handlerClassname) {
+                    /** @var \Gr77\Command\IntentHandler $handler */
+                    $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                    $intent = new WitAiIntent($intentType, $message);
+                    if (false === $handler->handleIntent($update, $intent)) {
+                        break;
                     }
                 }
             }
