@@ -65,16 +65,17 @@ class Intent extends Handler
 
     /**
      * try to return intent from text through Wit.ai API
-     * @param $text
+     * @param string $text
+     * @param string $thread_id
      * @return bool|string false if not an intent
      */
-    private function getIntentFromText($text)
+    private function getIntentFromText($text, $thread_id)
     {
         // handle user intent wit.ai api
         $witaiClient = new \Tgallice\Wit\Client($this->wit_ai_secret);
         $response = $witaiClient->get("/message", array(
             "q" => $text,
-            "thread_id" => $session->getSessionId(),
+            "thread_id" => $thread_id,
         ));
         $message = json_decode((string) $response->getBody(), true);
         if (isset($message["entities"]["Intent"])) {
@@ -105,13 +106,13 @@ class Intent extends Handler
         $handled = false;
         $text = $update->getMessage()->hasText() ? $update->getMessage()->getText() : false;
         if (false !== $text) {
-            $intentType = $this->getIntentFromText($text);
+            $intentType = $this->getIntentFromText($text, $session->getSessionId());
             if (false !== $intentType && false !== $handlers = $this->getIntentHandlers($intentType)) {
                 $handled = true;
                 foreach ($handlers as $handlerClassname) {
                     /** @var \Gr77\Command\IntentHandler $handler */
                     $handler = $handlerClassname::provide($client, $session, $config, $logger);
-                    $intent = new WitAiIntent($intentType, $message);
+                    $intent = new WitAiIntent($intentType, $update->getMessage());
                     if (false === $handler->handleIntent($update, $intent)) {
                         break;
                     }
