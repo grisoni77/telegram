@@ -23,8 +23,8 @@ abstract class Base implements Handler
     protected $logger;
     /** @var  array config bot */
     protected $config;
-
-//    protected $session;
+    /** @var Session  */
+    protected $session;
 
     /**
      * Base constructor.
@@ -76,6 +76,14 @@ abstract class Base implements Handler
 //     * @return mixed
 //     */
 //    protected function getSession()
+//    {
+//        return $this->session;
+//    }
+
+    /**
+     * @return Session
+     */
+//    public function getSession()
 //    {
 //        return $this->session;
 //    }
