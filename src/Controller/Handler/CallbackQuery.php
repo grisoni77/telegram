@@ -35,7 +35,7 @@ class CallbackQuery extends Handler
         {
             $callbackQuery = $update->getCallbackQuery();
             $data = InlineKeyboardButtonCallbackQuery::unserializedData($callbackQuery->getData());
-            $className = $config["handler_namespace"].$data[0];
+            $className = $config["config_bot"]["handler_namespace"].$data[0];
             $method = $data[1];
             $methodName = "handle".ucfirst($method);
             if (class_exists($className)) {
