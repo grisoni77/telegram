@@ -104,7 +104,7 @@ class Intent extends Handler
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
         $handled = false;
-        $text = $update->getMessage()->hasText() ? $update->getMessage()->getText() : false;
+        $text = $update->hasMessage() && $update->getMessage()->hasText() ? $update->getMessage()->getText() : false;
         if (false !== $text) {
             $intentType = $this->getIntentFromText($text, $session->getSessionId());
             if (false !== $intentType && false !== $handlers = $this->getIntentHandlers($intentType)) {

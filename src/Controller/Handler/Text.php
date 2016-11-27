@@ -102,14 +102,16 @@ class Text extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        $text = $update->getMessage()->hasText() ? $update->getMessage()->text : false;
-        if (false !== $text && false !== $handlers = $this->getTextHandlers($text)) {
-            //var_dump($handlers);
-            foreach ($handlers as $handlerClassname) {
-                /** @var \Gr77\Command\TextHandler $handler */
-                $handler = $handlerClassname::provide($client, $session, $config, $logger);
-                if (false === $handler->handleText($update)) {
-                    break;
+        if ($update->hasMessage() && $update->getMessage()->hasText()) {
+            $text = $update->getMessage()->text;
+            if (false !== $text && false !== $handlers = $this->getTextHandlers($text)) {
+                //var_dump($handlers);
+                foreach ($handlers as $handlerClassname) {
+                    /** @var \Gr77\Command\TextHandler $handler */
+                    $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                    if (false === $handler->handleText($update)) {
+                        break;
+                    }
                 }
             }
         } else {

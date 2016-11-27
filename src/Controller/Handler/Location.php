@@ -58,7 +58,7 @@ class Location extends Handler
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
         $handled = false;
-        if ($update->getMessage()->hasLocation() && count($this->locationHandlers)>0) {
+        if ($update->hasMessage() && $update->getMessage()->hasLocation() && count($this->locationHandlers)>0) {
             $handled = true;
             foreach ($this->locationHandlers as $handlerClassname) {
                 /** @var \Gr77\Command\LocationHandler $handler */

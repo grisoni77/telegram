@@ -77,7 +77,7 @@ class Command extends Handler
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
         $handled = false;
-        if ($update->getMessage()->isCommand()) {
+        if ($update->hasMessage() && $update->getMessage()->isCommand()) {
             $command = $update->getMessage()->getCommand();
             $text = $command->getValue();
             if ($this->hasCommandHandlers($text)) {
