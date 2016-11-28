@@ -20,9 +20,9 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 {
     public function testGetTextHandlers()
     {
-        $httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
-        $serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
-        $client = $this->getMockBuilder(Client::class)
+        $httpClient = $this->getMockBuilder('\Guzzle\Http\Client')->getMock();
+        $serializer = $this->getMockBuilder('\Gr77\Telegram\Request\NativeSerializer')->getMock();
+        $client = $this->getMockBuilder('Gr77\Telegram\Client')
             ->setConstructorArgs(array(array(),$httpClient, $serializer))
             ->getMock();
         $controller = new Controller("token", $client);
@@ -48,13 +48,13 @@ class ControllerTest extends \PHPUnit_Framework_TestCase
 
     public function testCallHandleLocation()
     {
-        $httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
-        $serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
-        $client = $this->getMockBuilder(Client::class)
+        $httpClient = $this->getMockBuilder('\Guzzle\Http\Client')->getMock();
+        $serializer = $this->getMockBuilder('\Gr77\Telegram\Request\NativeSerializer')->getMock();
+        $client = $this->getMockBuilder('Gr77\Telegram\Client')
             ->setConstructorArgs(array(array(),$httpClient, $serializer))
             ->getMock();
         $controller = new Controller("token", $client);
-        $controller = $this->getMockBuilder(Controller::class)
+        $controller = $this->getMockBuilder('Gr77\Controller\Controller')
             ->setConstructorArgs(array("token", $client))
             ->getMock();
 
