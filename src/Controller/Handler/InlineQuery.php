@@ -48,6 +48,22 @@ class InlineQuery extends Handler
                 }
             }
         }
+        if (isset($config["inlinequeryHandlers"]) && is_array($config["inlinequeryHandlers"]) && count($config["inlinequeryHandlers"])>0) {
+            foreach ($config["inlinequeryHandlers"] as $handler) {
+                $this->registerInlineQueryHandler($handler);
+            }
+        }
+    }
+
+    /**
+     * @param string $handler classname dell'handler
+     */
+    public function registerInlineQueryHandler($handler)
+    {
+        if (!$this->inlineQueryHandlers->offsetExists('all_handlers')) {
+            $this->inlineQueryHandlers->offsetSet('all_handlers', new \ArrayObject());
+        }
+        $this->inlineQueryHandlers['all_handlers']->append($handler);
     }
 
     /**
@@ -82,6 +98,10 @@ class InlineQuery extends Handler
     protected function getInlineQueryHandlers($text)
     {
         $results = new \ArrayObject();
+        $allHandlers = $this->inlineQueryHandlers->offsetGet('all_handlers');
+        foreach ($allHandlers as $allHandler) {
+            $results[] = $allHandler;
+        }
         $regexps = array_keys($this->inlineQueryHandlers->getArrayCopy());
         foreach ($regexps as $regexp) {
             if (preg_match($regexp, $text) === 1) {
