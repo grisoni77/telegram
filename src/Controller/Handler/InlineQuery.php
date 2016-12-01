@@ -104,7 +104,7 @@ class InlineQuery extends Handler
         }
         $regexps = array_keys($this->inlineQueryHandlers->getArrayCopy());
         foreach ($regexps as $regexp) {
-            if (preg_match($regexp, $text) === 1) {
+            if ($regexp != 'all_handlers' && preg_match($regexp, $text) === 1) {
                 foreach ($this->inlineQueryHandlers[$regexp] as $handler) {
                     $results->append($handler);
                 }
