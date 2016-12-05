@@ -12,7 +12,7 @@
 namespace Gr77\Telegram\Chat;
 
 
-class SuperGroupChat extends GroupChat
+class SupergroupChat extends GroupChat
 {
 
 }
