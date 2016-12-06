@@ -4,6 +4,7 @@ namespace Gr77\Telegram;
 use Gr77\Telegram\Message\Content\InputFile;
 use Gr77\Telegram\Message\Content\Location;
 use Gr77\Telegram\Message\Content\Text;
+use Gr77\Telegram\ReplyMarkup\ForceReply;
 use Gr77\Telegram\ReplyMarkup\ReplyMarkup;
 use Gr77\Telegram\Response\Boolean;
 use Gr77\Telegram\Response\Error;
@@ -308,6 +309,16 @@ class Client
     public function sendKeyboard($chat_id, Text $text, ReplyMarkup $keyboard)
     {
         return $this->sendMessage($chat_id, $text, null, null, null, null, $keyboard);
+    }
+
+    /**
+     * @param $chat_id
+     * @param Text $text
+     * @return Response
+     */
+    public function sendMessageWithReply($chat_id, Text $text)
+    {
+        return $this->sendKeyboard($chat_id, $text, new ForceReply());
     }
 
 
