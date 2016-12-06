@@ -71,6 +71,17 @@ class Message
      * @var PhotoSize[]
      */
     private $photo;
+    /**
+     * Optional. A new member was added to the group, information about them (this member may be the bot itself)
+     * @var \Gr77\Telegram\User
+     */
+    private $new_chat_member;
+    /**
+     * Optional. A member was removed from the group, information about them (this member may be the bot itself)
+     * @var \Gr77\Telegram\User
+     */
+    private $left_chat_member;
+
 
     private $data;
 
@@ -107,6 +118,12 @@ class Message
             foreach ($data["photo"] as $photosize) {
                 $message->addPhotosize(PhotoSize::mapFromArray($photosize));
             }
+        }
+        if (isset($data["new_chat_member"])) {
+            $message->setNewChatMember(User::mapFromArray($data["new_chat_member"]));
+        }
+        if (isset($data["left_chat_member"])) {
+            $message->setLeftChatMember(User::mapFromArray($data["left_chat_member"]));
         }
 
         $message->setData($data);
@@ -303,6 +320,43 @@ class Message
         $this->location = $location;
         return $this;
     }
+
+    /**
+     * @return User
+     */
+    public function getNewChatMember()
+    {
+        return $this->new_chat_member;
+    }
+
+    /**
+     * @param User $new_chat_member
+     * @return Message
+     */
+    public function setNewChatMember($new_chat_member)
+    {
+        $this->new_chat_member = $new_chat_member;
+        return $this;
+    }
+
+    /**
+     * @return User
+     */
+    public function getLeftChatMember()
+    {
+        return $this->left_chat_member;
+    }
+
+    /**
+     * @param User $left_chat_member
+     * @return Message
+     */
+    public function setLeftChatMember($left_chat_member)
+    {
+        $this->left_chat_member = $left_chat_member;
+        return $this;
+    }
+
 
 
 

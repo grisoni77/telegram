@@ -14,6 +14,8 @@ use Gr77\Telegram\Response\Updates;
 use GuzzleHttp\Exception\BadResponseException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Telegram\Exception\TelegramException;
+use Telegram\Response\Raw;
 
 class Client
 {
@@ -184,8 +186,13 @@ class Client
     public function getWebhookInfo()
     {
         try {
-            $res = json_decode((string) $this->post('getWebhookInfo')->getBody(), true);
-            return WebhookInfo::mapFromArray($res['result']);
+            $body = $this->post('getWebhookInfo')->getBody();
+            $res = new Raw($body);
+            if (!$res->isOk()) {
+                return WebhookInfo::mapFromArray($res->getResult());
+            } else {
+                throw TelegramException::throwUnsuccessfullRequest($res);
+            }
         } catch (BadResponseException $e) {
             $this->logger->error($e->getRequest()->getBody());
             $this->logger->error($e->getResponse()->getBody());
@@ -199,7 +206,14 @@ class Client
     public function getUpdates($params = array())
     {
         try {
-            $res = json_decode((string) $this->post('getUpdates', $params));
+            $body = $this->post('getUpdates', $params)->getBody();
+            $res = new Updates($body);
+            if (!$res->isOk()) {
+                return $res;
+            } else {
+                throw TelegramException::throwUnsuccessfullRequest($res);
+            }
+            $res = json_decode((string) $this->post('getUpdates', $params)->getBody());
             if ($res['ok']) {
                 return new Updates($res);
             } else {

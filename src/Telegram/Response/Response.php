@@ -18,12 +18,14 @@ abstract class Response
 {
     /** @var  bool */
     protected $ok;
-    /** @var  string */
+    /** @var  string human-readable description of the result */
     protected $description;
     /** @var  int */
     protected $error_code;
     /** @var  mixed */
     protected $result;
+    /** @var  mixed ResponseParameters object which can help to automatically handle the error */
+    protected $parameters;
 
     /**
      * Response constructor.
@@ -42,6 +44,9 @@ abstract class Response
         }
         if (isset($data['error_code'])) {
             $this->error_code = $data['error_code'];
+        }
+        if (isset($data['parameters'])) {
+            $this->parameters = $data['parameters'];
         }
     }
 
@@ -90,6 +95,25 @@ abstract class Response
     {
         return $this->error_code;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * @param mixed $parameters
+     * @return Response
+     */
+    public function setParameters($parameters)
+    {
+        $this->parameters = $parameters;
+        return $this;
+    }
+
 
     /**
      * @TODO Needs to change the way I manage this...
