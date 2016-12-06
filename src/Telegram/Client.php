@@ -137,16 +137,16 @@ class Client
                             'url' => $url,
                             'ceertificate' => $certificate->getResource(),
                         ]
-                    ]))
-                ;
+                    ])->getBody()
+                );
             } else {
                 $res = json_decode(
                     (string) $this->post('setWebhook', [
                         'json' => [
                             'url' => $url
                         ]
-                    ]))
-                ;
+                    ])->getBody()
+                );
             }
             return $res['description'];
         } catch (BadResponseException $e) {
