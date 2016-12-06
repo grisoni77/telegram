@@ -184,7 +184,7 @@ class Client
     public function getWebhookInfo()
     {
         try {
-            $res = json_decode((string) $this->post('getWebhookInfo')->getBody());
+            $res = json_decode((string) $this->post('getWebhookInfo')->getBody(), true);
             return WebhookInfo::mapFromArray($res);
         } catch (BadResponseException $e) {
             $this->logger->error($e->getRequest()->getBody());
