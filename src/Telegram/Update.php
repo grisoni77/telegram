@@ -40,6 +40,22 @@ class Update
      * @var \Gr77\Telegram\CallbackQuery\CallbackQuery
      */
     private $callback_query;
+    /**
+     * Optional. New version of a message that is known to the bot and was edited
+     * @var \Gr77\Telegram\Message\Message
+     */
+    private $edited_message;
+    /**
+     * Optional. New incoming channel post of any kind — text, photo, sticker, etc.
+     * @var \Gr77\Telegram\Message\Message
+     */
+    private $channel_post;
+    /**
+     * Optional. New version of a channel post that is known to the bot and was edited
+     * @var \Gr77\Telegram\Message\Message
+     */
+    private $edited_channel_post;
+
 
     private function __construct()
     {
@@ -60,6 +76,15 @@ class Update
         }
         if (isset($data['chosen_inline_result'])) {
             $update->setChosenInlineResult(ChosenInlineResult::mapFromArray($data['chosen_inline_result']));
+        }
+        if (isset($data['edited_message'])) {
+            $update->setEditedMessage(Message::mapFromArray($data['edited_message']));
+        }
+        if (isset($data['channel_post'])) {
+            $update->setChannelPost(Message::mapFromArray($data['channel_post']));
+        }
+        if (isset($data['edited_channel_post'])) {
+            $update->setEditedChannelPost(Message::mapFromArray($data['edited_channel_post']));
         }
         return $update;
     }
@@ -168,10 +193,71 @@ class Update
             return  $this->getInlineQuery()->getFrom()->getId();
         } elseif ($this->hasChosenInlineResult()) {
             return  $this->getChosenInlineResult()->getFrom()->getId();
+        } elseif ($this->hasChannelPost()) {
+            return  $this->getChannelPost()->getChat()->getId();
+        } elseif ($this->hasEditedMessage()) {
+            return  $this->getEditedMessage()->getChat()->getId();
+        } elseif ($this->hasEditedChannelPost()) {
+            return  $this->getEditedChannelPost()->getChat()->getId();
         } else {
             return false;
         }
     }
+
+    /**
+     * @return Message
+     */
+    public function getEditedMessage()
+    {
+        return $this->edited_message;
+    }
+
+    /**
+     * @param Message $edited_message
+     * @return Update
+     */
+    public function setEditedMessage($edited_message)
+    {
+        $this->edited_message = $edited_message;
+        return $this;
+    }
+
+    /**
+     * @return Message
+     */
+    public function getChannelPost()
+    {
+        return $this->channel_post;
+    }
+
+    /**
+     * @param Message $channel_post
+     * @return Update
+     */
+    public function setChannelPost($channel_post)
+    {
+        $this->channel_post = $channel_post;
+        return $this;
+    }
+
+    /**
+     * @return Message
+     */
+    public function getEditedChannelPost()
+    {
+        return $this->edited_channel_post;
+    }
+
+    /**
+     * @param Message $edited_channel_post
+     * @return Update
+     */
+    public function setEditedChannelPost($edited_channel_post)
+    {
+        $this->edited_channel_post = $edited_channel_post;
+        return $this;
+    }
+
 
     /**
      * @return bool
@@ -204,5 +290,31 @@ class Update
     {
         return isset($this->chosen_inline_result);
     }
+
+    /**
+     * @return bool
+     */
+    public function hasChannelPost()
+    {
+        return isset($this->channel_post);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasEditedChannelPost()
+    {
+        return isset($this->edited_channel_post);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasEditedMessage()
+    {
+        return isset($this->edited_message);
+    }
+
+
 
 }
