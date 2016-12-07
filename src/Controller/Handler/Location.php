@@ -57,9 +57,9 @@ class Location extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        $is_group_bot = isset($config['config_bot']['group_bot']) && $config['config_bot']['group_bot'];
+        $is_channel_bot = isset($config['config_bot']['channel_bot']) && $config['config_bot']['channel_bot'];
         $has_location = ($update->hasMessage() && $update->getMessage()->hasLocation())
-            || ($is_group_bot && $update->hasChannelPost() && $update->getChannelPost()->hasLocation());
+            || ($is_channel_bot && $update->hasChannelPost() && $update->getChannelPost()->hasLocation());
 
         $handled = false;
         if ($has_location && count($this->locationHandlers)>0) {

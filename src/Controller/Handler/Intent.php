@@ -103,10 +103,10 @@ class Intent extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        $is_group_bot = isset($config['config_bot']['group_bot']) && $config['config_bot']['group_bot'];
+        $is_channel_bot = isset($config['config_bot']['channel_bot']) && $config['config_bot']['channel_bot'];
         if ($update->hasMessage() && $update->getMessage()->hasText()) {
             $text = $update->getMessage()->getText();
-        } elseif ($is_group_bot && $update->hasChannelPost() && $update->getChannelPost()->hasText()) {
+        } elseif ($is_channel_bot && $update->hasChannelPost() && $update->getChannelPost()->hasText()) {
             $text = $update->getChannelPost()->getText();
         }
 
