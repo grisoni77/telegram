@@ -102,9 +102,17 @@ class Text extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
+        $is_group_bot = isset($config['config_bot']['group_bot']) && $config['config_bot']['group_bot'];
         if ($update->hasMessage() && $update->getMessage()->hasText()) {
-            $text = $update->getMessage()->text;
+            $text = $update->getMessage()->getText();
+        } elseif ($is_group_bot && $update->hasChannelPost() && $update->getChannelPost()->hasText()) {
+            $text = $update->getChannelPost()->getText();
+        }
+
+        $handled = false;
+        if (isset($text)) {
             if (false !== $text && false !== $handlers = $this->getTextHandlers($text)) {
+                $handled = true;
                 //var_dump($handlers);
                 foreach ($handlers as $handlerClassname) {
                     /** @var \Gr77\Command\TextHandler $handler */
@@ -114,7 +122,8 @@ class Text extends Handler
                     }
                 }
             }
-        } else {
+        }
+        if (!$handled) {
             parent::handleUpdate($update, $client, $session, $config, $logger);
         }
     }

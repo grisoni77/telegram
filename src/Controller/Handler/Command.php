@@ -76,9 +76,15 @@ class Command extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
-        $handled = false;
+        $is_group_bot = isset($config['config_bot']['group_bot']) && $config['config_bot']['group_bot'];
         if ($update->hasMessage() && $update->getMessage()->isCommand()) {
             $command = $update->getMessage()->getCommand();
+        } elseif ($is_group_bot && $update->hasChannelPost() && $update->getChannelPost()->isCommand()) {
+            $command = $update->getChannelPost()->getCommand();
+        }
+
+        $handled = false;
+        if (isset($command)) {
             $text = $command->getValue();
             if ($this->hasCommandHandlers($text)) {
                 $handled = true;

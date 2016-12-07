@@ -103,9 +103,15 @@ class Intent extends Handler
      */
     public function handleUpdate(Update $update, Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
+        $is_group_bot = isset($config['config_bot']['group_bot']) && $config['config_bot']['group_bot'];
+        if ($update->hasMessage() && $update->getMessage()->hasText()) {
+            $text = $update->getMessage()->getText();
+        } elseif ($is_group_bot && $update->hasChannelPost() && $update->getChannelPost()->hasText()) {
+            $text = $update->getChannelPost()->getText();
+        }
+
         $handled = false;
-        $text = $update->hasMessage() && $update->getMessage()->hasText() ? $update->getMessage()->getText() : false;
-        if (false !== $text) {
+        if (isset($text)) {
             $intentType = $this->getIntentFromText($text, $session->getSessionId());
             if (false !== $intentType && false !== $handlers = $this->getIntentHandlers($intentType)) {
                 $handled = true;
