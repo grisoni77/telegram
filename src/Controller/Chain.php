@@ -92,7 +92,7 @@ class Chain
     private function initChatSession(Update $update)
     {
         $session_id = $this->getSessionId($update);
-        $this->session = SessionFactory::create($session_id, $this->config["session_type"], $this->name);
+        $this->session = SessionFactory::create($session_id, $this->config["session_type"], $this->config['token']);
     }
 
     /**
