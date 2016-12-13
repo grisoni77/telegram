@@ -69,7 +69,7 @@ abstract class Response
      */
     public function isOk()
     {
-        return $this->ok;
+        return $this->ok===1 || $this->ok===true;
     }
 
     /**
