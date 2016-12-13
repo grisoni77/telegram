@@ -6,7 +6,7 @@
  * Time: 14:33
  */
 
-namespace Telegram\Exception;
+namespace Gr77\Telegram\Exception;
 
 use Exception;
 use Gr77\Telegram\Response\Response;
