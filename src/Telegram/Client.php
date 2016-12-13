@@ -188,7 +188,7 @@ class Client
         try {
             $body = $this->post('getWebhookInfo')->getBody();
             $res = new Raw($body);
-            if (!$res->isOk()) {
+            if ($res->isOk()) {
                 return WebhookInfo::mapFromArray($res->getResult());
             } else {
                 throw TelegramException::throwUnsuccessfullRequest($res);
