@@ -24,7 +24,7 @@ Command Handler example:
      namespace MyHandlers;
      
      use Gr77\Command\Base;
-     use Gr77\Telegram\Message\Content\Text;
+     use Gr77\Telegram\Message\Content\PlainText;
      use Gr77\Telegram\Update;
      
      class Start extends Base
@@ -36,7 +36,7 @@ Command Handler example:
          public function __invoke(Update $update)
          {
              $chat_id = $update->getMessage()->chat['id'];
-             $text = new Text("Some welcome text");
+             $text = new PlainText("Some welcome text");
              $res = $this->client->sendMessage($chat_id, $text);
              
              return $res->isOk();

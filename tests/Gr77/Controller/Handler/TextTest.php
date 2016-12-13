@@ -9,7 +9,7 @@
 namespace tests\Gr77\Controller;
 
 
-use Gr77\Controller\Handler\Text;
+use Gr77\Telegram\Message\Content\PlainText;
 use PHPUnit_Framework_TestCase;
 use Gr77\Controller\Chain;
 use Gr77\Telegram\Client;
@@ -20,7 +20,7 @@ class TextTest extends TestCase
 {
     public function testGetTextHandlers()
     {
-        $textHandler = new Text(array());
+        $textHandler = new PlainText(array());
         $textHandler->registerRegexpHandler("/Test/i", "MyHandler");
         $textHandler->registerTextHandler("test", "MyHandler2");
         $textHandler->registerRegexpHandler("/Search (.*)/i", "MyHandler3");

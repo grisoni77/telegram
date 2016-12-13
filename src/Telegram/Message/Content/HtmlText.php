@@ -14,7 +14,7 @@ namespace Gr77\Telegram\Message\Content;
 
 use Stringy\Stringy as S;
 
-class HtmlText extends Text
+class HtmlText extends PlainText
 {
     private $tag_conversion = array(
 //        "strong" => "b",
