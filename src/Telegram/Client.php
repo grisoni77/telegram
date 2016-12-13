@@ -14,8 +14,8 @@ use Gr77\Telegram\Response\Updates;
 use GuzzleHttp\Exception\BadResponseException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Telegram\Exception\TelegramException;
-use Telegram\Response\Raw;
+use Gr77\Telegram\Exception\TelegramException;
+use Gr77\Telegram\Response\Raw;
 
 class Client
 {
