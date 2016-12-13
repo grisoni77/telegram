@@ -26,8 +26,9 @@ class TelegramException extends \Exception
      */
     public static function throwUnsuccessfullRequest($res)
     {
-        $error_code = isset($res['error_code']) ? (int) $res['error_code'] : 400;
-        $exception = new self($res['description'], $error_code);
+        $error_code = (int) $res->getErrorCode();
+        $error_code = isset($error_code) ? $error_code : 400;
+        $exception = new self($res->getDescription(), $error_code);
         $exception->setResponse($res);
         return $exception;
     }
