@@ -1,6 +1,6 @@
 <?php
 
-namespace Telegram\Response;
+namespace Gr77\Telegram\Response;
 
 
 use Gr77\Telegram\Response\Response;
