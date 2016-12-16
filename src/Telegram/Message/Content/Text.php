@@ -9,7 +9,7 @@
 namespace Gr77\Telegram\Message\Content;
 
 
-interface Text
+interface Text extends \JsonSerializable
 {
     /**
      * @return string
