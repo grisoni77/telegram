@@ -528,14 +528,16 @@ class Client
      *
      * @param $callback_query_id Unique identifier for the query to be answered
      * @param string|null $text Text of the notification. If not specified, nothing will be shown to the user
-     * @param null $show_alert If true, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
+     * @param bool|null $show_alert If true, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
+     * @param int|null $cache_time The maximum amount of time in seconds that the result of the callback query may be cached client-side. Telegram apps will support caching starting in version 3.14. Defaults to 0.
      * @return Response
      * @see https://core.telegram.org/bots/api#answercallbackquery
      */
     public function answerCallbackQuery(
         $callback_query_id,
         $text = null,
-        $show_alert = null
+        $show_alert = null,
+        $cache_time = null
     )
     {
         try {
@@ -598,7 +600,10 @@ class Client
             if (isset($parse_mode)) {
                 $body["parse_mode"] = $parse_mode;
             } else {
-                $body["parse_mode"] = $text->getParseMode();
+                $parse_mode = $text->getParseMode();
+                if (!empty($parse_mode)) {
+                    $body["parse_mode"] = $parse_mode;
+                }
             }
             if (isset($disable_web_page_preview)) {
                 $body["disable_web_page_preview"] = $disable_web_page_preview;
