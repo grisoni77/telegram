@@ -10,6 +10,7 @@ namespace Gr77\Controller;
 
 use Gr77\Session\Session;
 use Gr77\Session\SessionFactory;
+use Gr77\Telegram\Exception\TelegramException;
 use Gr77\Telegram\Update;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -98,13 +99,15 @@ class Chain
     /**
      * @param Update $update
      * @return int
+     * @throws \BadMethodCallException
      */
     private function getSessionId(Update $update)
     {
         if (false !== $chat_id = $update->getChatId()) {
             return $chat_id;
+        } else {
+            throw new \BadMethodCallException("chat_id is not set or is not valid", 400);
         }
-        return session_id();
     }
 
 }
