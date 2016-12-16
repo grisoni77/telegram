@@ -59,7 +59,9 @@ abstract class Base implements Handler
         // init settings if any
         if (isset($config['config_bot']['settings'])) {
             $settingsInitClass = $config['config_bot']['settings_namespace'].'Initialize';
-            $settingsInitClass::init($handler);
+            if (class_exists($settingsInitClass)) {
+                $settingsInitClass::init($handler);
+            }
         }
 
         return $handler;
@@ -152,7 +154,7 @@ abstract class Base implements Handler
         if (isset($settings[$setting])) {
             return $settings[$setting];
         } else {
-            return null;
+            return $default;
         }
     }
 
