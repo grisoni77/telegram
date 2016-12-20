@@ -139,6 +139,7 @@ class InlineQuery extends Handler
                 foreach ($handlers as $handlerClassname) {
                     /** @var \Gr77\Command\InlineQueryHandler $handler */
                     $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                    $logger->debug(__METHOD__.": handled by ".$handlerClassname);
                     if ($handler instanceof InlineQueryHandler && false === $handler->handleInlineQuery($update)) {
                         break;
                     }

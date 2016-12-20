@@ -117,6 +117,7 @@ class Text extends Handler
                 foreach ($handlers as $handlerClassname) {
                     /** @var \Gr77\Command\TextHandler $handler */
                     $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                    $logger->debug(__METHOD__.": handled by ".$handlerClassname);
                     if (false === $handler->handleText($update)) {
                         break;
                     }

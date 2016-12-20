@@ -118,6 +118,7 @@ class ChosenInlineResult extends Handler
                 foreach ($handlers as $handlerClassname) {
                     /** @var \Gr77\Command\ChosenInlineResultHandler $handler */
                     $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                    $logger->debug(__METHOD__.": handled by ".$handlerClassname);
                     if (false === $handler->handleChosenInlineResult($update)) {
                         break;
                     }

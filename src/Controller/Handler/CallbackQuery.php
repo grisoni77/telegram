@@ -41,6 +41,7 @@ class CallbackQuery extends Handler
             if (class_exists($className)) {
                 $handler = $className::provide($client, $session, $config, $logger);
                 if (method_exists($handler, $methodName)) {
+                    $logger->debug(__METHOD__.": handled by ".$className."::".$methodName);
                     return call_user_func(array($handler, $methodName), $update);
                 }
             }

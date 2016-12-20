@@ -50,6 +50,7 @@ class WaitingAnswer extends Handler
             $handlerClassname = $handler_waiting;
             /** @var \Gr77\Command\AnswerHandler $handler */
             $handler = $handlerClassname::provide($client, $session, $config, $logger);
+            $logger->debug(__METHOD__.": handled by ".$handlerClassname);
             return $handler->handleAnswer($update);
         } else {
             parent::handleUpdate($update, $client, $session, $config, $logger);

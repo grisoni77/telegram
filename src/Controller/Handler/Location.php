@@ -67,6 +67,7 @@ class Location extends Handler
             foreach ($this->locationHandlers as $handlerClassname) {
                 /** @var \Gr77\Command\LocationHandler $handler */
                 $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                $logger->debug(__METHOD__.": handled by ".$handlerClassname);
                 if (false === $handler->handleLocation($update)) {
                     break;
                 }

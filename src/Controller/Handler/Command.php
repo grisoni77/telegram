@@ -93,6 +93,7 @@ class Command extends Handler
                 foreach ($handlers as $handlerClassname) {
                     /** @var CommandHandler $handler */
                     $handler = $handlerClassname::provide($client, $session, $config, $logger);
+                    $logger->debug(__METHOD__.": handled by ".$handlerClassname);
                     if (false === $handler->handleCommand($update)) {
                         break;
                     }

@@ -119,6 +119,7 @@ class Intent extends Handler
                     /** @var \Gr77\Command\IntentHandler $handler */
                     $handler = $handlerClassname::provide($client, $session, $config, $logger);
                     $intent = new WitAiIntent($intentType, $update->getMessage());
+                    $logger->debug(__METHOD__.": ".$intentType." handled by ".$handlerClassname);
                     if (false === $handler->handleIntent($update, $intent)) {
                         break;
                     }
