@@ -124,7 +124,7 @@ class Client
             return $this->httpClient->post($endpoint, $params);
         } catch (\Exception $e) {
             $this->logger->debug($endpoint);
-            $this->logger->debug($params);
+            $this->logger->debug(print_r($params,true));
             $this->logger->error($e->getMessage());
             exit(); # TODO handle it in a proper way
         }
