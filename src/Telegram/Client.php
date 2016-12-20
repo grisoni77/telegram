@@ -119,8 +119,15 @@ class Client
      */
     private function post($method, $params = [])
     {
-        $endpoint = 'https://api.telegram.org/bot'.$this->getToken().'/'.$method;
-        return $this->httpClient->post($endpoint, $params);
+        try {
+            $endpoint = 'https://api.telegram.org/bot'.$this->getToken().'/'.$method;
+            return $this->httpClient->post($endpoint, $params);
+        } catch (\Exception $e) {
+            $this->logger->debug($endpoint);
+            $this->logger->debug($params);
+            $this->logger->error($e->getMessage());
+            return false;
+        }
     }
 
     /**
