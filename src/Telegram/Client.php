@@ -126,7 +126,7 @@ class Client
             $this->logger->debug($endpoint);
             $this->logger->debug($params);
             $this->logger->error($e->getMessage());
-            return false;
+            exit(); # TODO handle it in a proper way
         }
     }
 
