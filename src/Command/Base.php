@@ -136,11 +136,30 @@ abstract class Base implements Handler
     }
 
     /**
+     * @return array $settings
+     */
+    public function getSettings()
+    {
+        $this->getState('settings', []);
+    }
+
+    /**
      * @param array $settings
      */
     public function setSettings($settings)
     {
         $this->session->set('settings', $settings);
+    }
+
+    /**
+     * @param string $setting
+     * @param string $value
+     */
+    public function setSetting($setting, $value)
+    {
+        $settings = $this->getSettings();
+        $settings[$setting] = $value;
+        $this->setSettings($settings);
     }
 
     /**
