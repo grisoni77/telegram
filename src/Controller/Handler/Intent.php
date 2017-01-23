@@ -113,6 +113,7 @@ class Intent extends Handler
         $handled = false;
         if (isset($text)) {
             $intentType = $this->getIntentFromText($text, $session->getSessionId());
+            $logger->debug($intentType);
             if (false !== $intentType && false !== $handlers = $this->getIntentHandlers($intentType)) {
                 $handled = true;
                 foreach ($handlers as $handlerClassname) {
