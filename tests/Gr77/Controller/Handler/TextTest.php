@@ -6,9 +6,10 @@
  * Time: 16:09
  */
 
-namespace tests\Gr77\Controller;
+namespace tests\Gr77\Controller\Handler;
 
 
+use Gr77\Controller\Handler\Text;
 use Gr77\Telegram\Message\Content\PlainText;
 use PHPUnit_Framework_TestCase;
 use Gr77\Controller\Chain;
@@ -20,7 +21,7 @@ class TextTest extends TestCase
 {
     public function testGetTextHandlers()
     {
-        $textHandler = new PlainText(array());
+        $textHandler = new Text(array());
         $textHandler->registerRegexpHandler("/Test/i", "MyHandler");
         $textHandler->registerTextHandler("test", "MyHandler2");
         $textHandler->registerRegexpHandler("/Search (.*)/i", "MyHandler3");

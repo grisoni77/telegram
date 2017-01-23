@@ -21,7 +21,8 @@ class ChainTest extends TestCase
     public function testHandleUpdate()
     {
         $config = [
-            "session_type" => "null"
+            "session_type" => "null",
+            "token" => "xcvxcvxcbxcvb",
         ];
         //$httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
         //$serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
@@ -55,7 +56,8 @@ class ChainTest extends TestCase
     public function testHandleLocation()
     {
         $config = [
-            "session_type" => "null"
+            "session_type" => "null",
+            "token" => "xcvxcvxcbxcvb",
         ];
         //$httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
         //$serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();

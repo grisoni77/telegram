@@ -6,7 +6,7 @@
  * Time: 13:38
  */
 
-namespace tests\Gr77\Controller;
+namespace tests\Gr77\Controller\Handler;
 
 
 use Gr77\Controller\Handler\Intent;

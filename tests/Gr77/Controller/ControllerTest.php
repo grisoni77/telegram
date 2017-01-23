@@ -21,10 +21,14 @@ class ControllerTest extends TestCase
 {
     public function testGetTextHandlers()
     {
+        $config = [
+            "session_type" => "null",
+            "token" => "xcvxcvxcbxcvb",
+        ];
         //$httpClient = $this->getMockBuilder(\Guzzle\Http\Client::class)->getMock();
         //$serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
         $client = $this->getMockBuilder(Client::class)
-            ->setConstructorArgs(array(array()))
+            ->setConstructorArgs(array($config))
             ->getMock();
         $controller = new Controller("token", $client);
 
