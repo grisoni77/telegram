@@ -1,4 +1,6 @@
 # PHP Telegram client
+[![Build Status](https://travis-ci.org/grisoni77/telegram.svg?branch=master)](https://travis-ci.org/grisoni77/telegram)
+
 Usage example:
 
     $token = <bot_token>;
