@@ -29,6 +29,7 @@ class ControllerTest extends TestCase
         //$serializer = $this->getMockBuilder(\Gr77\Telegram\Request\NativeSerializer::class)->getMock();
         $client = $this->getMockBuilder(Client::class)
             ->setConstructorArgs(array($config))
+
             ->getMock();
         $controller = new Controller("token", $client);
 
@@ -72,6 +73,7 @@ class ControllerTest extends TestCase
 //        ;
 //        $controller->handleUpdate($update);
 //    }
+
 
 
 }
