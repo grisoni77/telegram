@@ -30,6 +30,10 @@ class PhpSession implements Session
     public function __construct($session_id, $token)
     {
         if (!isset($_SESSION)) {
+            $session_id = (string) $session_id;
+            if (empty($session_id) || !preg_match('/[A-Za-z0-9-,]/', $session_id)) {
+                throw new \BadMethodCallException("Invalid session ID: ".$session_id, 500);
+            }
             $this->session_id = $session_id;
             session_id($session_id);
             session_start();
@@ -47,7 +51,7 @@ class PhpSession implements Session
      */
     public function getSessionId()
     {
-        return $this->getSessionId();
+        return $this->session_id;
     }
 
     /**

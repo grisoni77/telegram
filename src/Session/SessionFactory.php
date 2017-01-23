@@ -28,6 +28,9 @@ abstract class SessionFactory
             case 'php':
                 return new PhpSession($session_id, $token);
 
+            case 'in-memory':
+                return new InMemorySession($session_id);
+
             default:
                 return new NullSession();
 

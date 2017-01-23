@@ -23,8 +23,8 @@ abstract class Base implements Handler
     protected $logger;
     /** @var  array config bot */
     protected $config;
-
-//    protected $session;
+    /** @var Session  */
+    protected $session;
 
     /**
      * Base constructor.
@@ -55,6 +55,15 @@ abstract class Base implements Handler
     public static function provide(Client $client, Session $session, $config = array(), LoggerInterface $logger = null)
     {
         $handler = new static($client, $session, $config, $logger);
+
+        // init settings if any
+        if (isset($config['config_bot']['settings'])) {
+            $settingsInitClass = $config['config_bot']['settings_namespace'].'Initialize';
+            if (class_exists($settingsInitClass)) {
+                $settingsInitClass::init($handler);
+            }
+        }
+
         return $handler;
     }
 
@@ -65,29 +74,59 @@ abstract class Base implements Handler
         return get_called_class();
     }
 
-//    protected function initSession($session_id)
-//    {
-//        session_id($session_id);
-//        session_start();
-//        $this->session = $_SESSION;
-//        return $this->session;
-//    }
-//
-//    /**
-//     * @return mixed
-//     */
-//    protected function getSession()
-//    {
-//        return $this->session;
-//    }
+    /**
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     * @return Base
+     */
+    public function setLogger($logger)
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
+    /**
+     * Returns chat_id derived from session
+     * (it must always be set, otherwise an exception is thrown during session initialization)
+     * @return string
+     */
+    public function getChatId()
+    {
+        return $this->session->getSessionId();
+    }
 
     protected function setState($var, $value)
     {
+        // protected states..
+        if (in_array($var, ['settings'])) {
+            return;
+        }
+
         $this->session->set($var, $value);
     }
 
     protected function unsetState($var)
     {
+        // protected states..
+        if (in_array($var, ['settings'])) {
+            return;
+        }
+
         $this->session->delete($var);
     }
 
@@ -96,6 +135,51 @@ abstract class Base implements Handler
         return $this->session->get($var, $default);
     }
 
+    /**
+     * @return array $settings
+     */
+    public function getSettings()
+    {
+        $this->getState('settings', []);
+    }
+
+    /**
+     * @param array $settings
+     */
+    public function setSettings($settings)
+    {
+        $this->session->set('settings', $settings);
+    }
+
+    /**
+     * @param string $setting
+     * @param string $value
+     */
+    public function setSetting($setting, $value)
+    {
+        $settings = $this->getSettings();
+        $settings[$setting] = $value;
+        $this->setSettings($settings);
+    }
+
+    /**
+     * @param string $setting
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getSetting($setting, $default = null)
+    {
+        $settings = $this->getState('settings', []);
+        if (isset($settings[$setting])) {
+            return $settings[$setting];
+        } else {
+            return $default;
+        }
+    }
+
+    /**
+     * Utility to force the next answer to be sent to this handler
+     */
     protected function setWaitingAnswer()
     {
         $class = $this->getClassName();

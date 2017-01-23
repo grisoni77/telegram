@@ -11,23 +11,30 @@
 namespace Gr77\Telegram\Response;
 
 
-use Guzzle\Http\Exception\BadResponseException;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Psr7\Stream;
 
 abstract class Response
 {
     /** @var  bool */
     protected $ok;
-    /** @var  string */
+    /** @var  string human-readable description of the result */
     protected $description;
     /** @var  int */
     protected $error_code;
+    /** @var  mixed */
+    protected $result;
+    /** @var  mixed ResponseParameters object which can help to automatically handle the error */
+    protected $parameters;
 
     /**
      * Response constructor.
-     * @param $data array
+     * @param $data Stream
      */
-    public function __construct($data)
+    public function __construct(Stream $stream)
     {
+        $data = json_decode((string) $stream, true);
+
         $this->ok = $data['ok'];
         if (isset($data['description'])) {
             $this->description = $data['description'];
@@ -38,10 +45,14 @@ abstract class Response
         if (isset($data['error_code'])) {
             $this->error_code = $data['error_code'];
         }
+        if (isset($data['parameters'])) {
+            $this->parameters = $data['parameters'];
+        }
     }
 
     /**
-     * @param $result result field in telegram response
+     * Template method to be implemented in concrete classes
+     * @param mixed $result result field in telegram response
      */
     abstract protected function parseResult($result);
 
@@ -58,7 +69,7 @@ abstract class Response
      */
     public function isOk()
     {
-        return $this->ok;
+        return $this->ok===1 || $this->ok===true;
     }
 
     /**
@@ -85,22 +96,48 @@ abstract class Response
         return $this->error_code;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * @param mixed $parameters
+     * @return Response
+     */
+    public function setParameters($parameters)
+    {
+        $this->parameters = $parameters;
+        return $this;
+    }
+
+
+    /**
+     * @TODO Needs to change the way I manage this...
+     *
+     * @param BadResponseException $e
+     * @return Error|Forbidden
+     */
     public static function handleException(BadResponseException $e)
     {
+        $e->getResponse()->getBody();
         $code = $e->getResponse()->getStatusCode();
         if ($code == 403) {
-            return new Forbidden(array(
+            return new Forbidden(\GuzzleHttp\Psr7\stream_for(json_encode([
                 "ok" => false,
                 "error_code" => 403,
                 "result" => $e->getMessage(),
-            ));
+            ])));
         }
         else {
-            return new Error(array(
+            return new Error(\GuzzleHttp\Psr7\stream_for(json_encode([
                 "ok" => false,
                 "error_code" => $e->getCode(),
                 "description" => $e->getCode()." ".$e->getMessage(),
-            ));
+            ])));
         }
     }
 }

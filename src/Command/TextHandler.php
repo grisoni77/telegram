@@ -18,7 +18,7 @@ interface TextHandler
 {
     /**
      * @param Update $update
-     * @return bool Ritorna false per interrompere la catena di handlers
+     * @return bool Returns false to break handlers' chain
      */
     public function handleText(Update $update);
 }

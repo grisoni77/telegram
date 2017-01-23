@@ -12,13 +12,17 @@
             "Gr77\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": { "tests\\": "tests" }
+    },
     "require": {
-        "guzzle/guzzle": "v3.8.1",
-        "joomla/string": "~1.0",
+        "guzzlehttp/guzzle": "~6.2",
+        "danielstjules/stringy": "~2.3",
+        "tgallice/wit-php": "*",
         "psr/log": "1.0.*"
     },
     "require-dev": {
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "~5"
     },
     "suggest": {
         "jms/serializer": "0.16.0"
