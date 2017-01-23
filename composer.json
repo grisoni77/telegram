@@ -22,7 +22,7 @@
         "psr/log": "1.0.*"
     },
     "require-dev": {
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "~5"
     },
     "suggest": {
         "jms/serializer": "0.16.0"
