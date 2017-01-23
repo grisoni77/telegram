@@ -47,7 +47,7 @@ class CallbackQuery extends Handler
             }
         }
         else {
-            parent::handleUpdate($update, $client, $session, $config, $logger);
+            return parent::handleUpdate($update, $client, $session, $config, $logger);
         }
     }
 }
