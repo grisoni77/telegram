@@ -151,7 +151,7 @@ class Builder
             $this->log('BUILDER: invalid config');
             return false;
         }
-        if (count($this->features) === 1) {
+        if (!$this->hasAllFeatures() && count($this->features) === 1) {
             $this->log('BUILDER: empty features');
             return false;
         }
