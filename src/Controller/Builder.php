@@ -134,12 +134,29 @@ class Builder
         }
     }
 
+    private function log($msg, $level = 'debug')
+    {
+        if (isset($this->logger)) {
+            $this->logger->log($level, $msg);
+        }
+    }
+
     private function validate()
     {
-        return isset($this->client) && $this->client instanceof Client
-            && isset($this->config)
-            && count($this->features) > 1
-            ;
+        if (!isset($this->client) || !$this->client instanceof Client) {
+            $this->log('BUILDER: invalid client');
+            return false;
+        }
+        if (!isset($this->config)) {
+            $this->log('BUILDER: invalid config');
+            return false;
+        }
+        if (count($this->features) === 1) {
+            $this->log('BUILDER: empty features');
+            return false;
+        }
+
+        return true;
     }
 
 
