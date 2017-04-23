@@ -162,6 +162,7 @@ abstract class MessageEntity
      */
     protected function extractValue($text)
     {
+        $text = json_decode('"'.$text.'"');
         return mb_substr($text, $this->offset, $this->length);
     }
 }
