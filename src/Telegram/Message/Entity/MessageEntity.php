@@ -162,6 +162,6 @@ abstract class MessageEntity
      */
     protected function extractValue($text)
     {
-        return substr($text, $this->offset, $this->length);
+        return mb_substr($text, $this->offset, $this->length);
     }
 }

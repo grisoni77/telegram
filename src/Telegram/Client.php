@@ -154,7 +154,7 @@ class Client
                         'json' => [
                             'url' => $url
                         ]
-                    ])->getBody()
+                    ])->getBody(), true
                 );
             }
             return $res['description'];
