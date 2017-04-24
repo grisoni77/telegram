@@ -144,7 +144,7 @@ class Client
                     (string) $this->post('setWebhook', [
                         'multipart' => [
                             'url' => $url,
-                            'ceertificate' => $certificate->getResource(),
+                            'certificate' => $certificate->getResource(),
                         ]
                     ])->getBody()
                 );
