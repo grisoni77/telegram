@@ -72,8 +72,7 @@ abstract class Chat
         if (!isset($data["id"]) || !isset($data["type"])) {
             throw new \InvalidArgumentException("Id and type are mandatory fields for Chat", 400);
         }
-        $chat = new static($data["id"], $data["type"]);
-        return $chat;
+		return new static($data["id"], $data["type"]);
     }
 
     /**
